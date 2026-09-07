@@ -1,0 +1,12 @@
+{
+  "_comment": "File mẫu cấu hình Manga Translator. Bạn có thể sao chép thành config.json hoặc chỉnh sửa qua giao diện Cài đặt (http://127.0.0.1:8765/settings.html)",
+  "api_key": "",
+  "base_url": "https://api.xkiro.com/v1",
+  "model": "qwen/qwen3.5-flash:free",
+  "source_lang": "tiếng Anh (hoặc tiếng Nhật gốc)",
+  "target_lang": "tiếng Việt",
+  "server_port": 8765,
+  "max_workers": 10,
+  "pipeline_type": "ocr_trans",
+  "translation_provider": "google"
+}

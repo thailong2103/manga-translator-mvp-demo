@@ -1,0 +1,29 @@
+# Môi trường ảo Python
+.venv/
+env/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mô hình AI nặng (sẽ tải bằng download_models.py)
+models/*.onnx
+models/.cache/
+
+# Dữ liệu tạm thời & cache truyện
+cache_chapters/
+output_translations/
+*.tmp
+*.log
+
+# Cấu hình cá nhân (chặn commit nhầm API key)
+config.json
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

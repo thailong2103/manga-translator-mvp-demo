@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Stream Reader — Bản Dịch Siêu Tốc</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <!-- Header / Control Navbar -->
+    <header id="main-header" class="glass-bar">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Manga<span class="highlight">Stream</span></span>
+            </div>
+            <div class="chapter-picker-wrapper">
+                <select id="chapter-select" aria-label="Chọn tập truyện">
+                    <option value="">Đang nạp danh sách tập...</option>
+                </select>
+            </div>
+            <button id="btn-open-upload" class="action-btn upload-btn" title="Tải lên ảnh truyện từ máy">
+                <span class="btn-icon">📁</span>
+                <span class="btn-text">Thêm ảnh</span>
+            </button>
+        </div>
+
+        <div class="header-center">
+            <div id="single-page-nav" class="page-nav-controls hidden">
+                <button id="btn-prev" class="nav-btn" title="Trang trước (Phím A hoặc ←)">‹</button>
+                <span id="page-counter" class="page-indicator">Trang 1 / 1</span>
+                <button id="btn-next" class="nav-btn" title="Trang sau (Phím D hoặc →)">›</button>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- Toggle Mode: Long Strip vs Single Page -->
+            <div class="mode-toggles">
+                <button id="mode-strip" class="mode-btn active" title="Chế độ cuộn dọc (Webtoon)">📜 Cuộn</button>
+                <button id="mode-single" class="mode-btn" title="Chế độ từng trang">📖 Từng trang</button>
+            </div>
+
+            <!-- Toggle Translation Overlay (Hotkey T) -->
+            <button id="btn-toggle-trans" class="pill-btn active" title="Ẩn/Hiện bản dịch (Phím T)">
+                <span class="pill-dot"></span>
+                <span id="trans-text-status">🇻🇳 Tiếng Việt</span>
+            </button>
+
+            <!-- Settings Menu Trigger -->
+            <button id="btn-settings" class="icon-btn" title="Cài đặt">⚙️</button>
+            <button id="btn-fullscreen" class="icon-btn" title="Toàn màn hình (Phím F)">⛶</button>
+        </div>
+    </header>
+
+    <!-- Settings Dropdown Panel -->
+    <div id="settings-panel" class="settings-modal glass-panel hidden">
+        <div class="settings-header">
+            <h4>Cài Đặt Hiển Thị</h4>
+            <button id="btn-close-settings" class="close-btn">✕</button>
+        </div>
+        <div class="settings-body">
+            <div class="setting-item">
+                <label for="slider-opacity">Độ mờ nền bong bóng thoại:</label>
+                <input type="range" id="slider-opacity" min="60" max="100" value="96">
+                <span id="val-opacity">96%</span>
+            </div>
+            <div class="setting-item">
+                <label for="slider-scale">Kích cỡ font chữ:</label>
+                <input type="range" id="slider-scale" min="80" max="140" value="100">
+                <span id="val-scale">100%</span>
+            </div>
+            <div class="setting-item shortcuts-guide">
+                <h5>Phím tắt tiện lợi:</h5>
+                <ul>
+                    <li><kbd>T</kbd>: Bật/Tắt đè chữ tiếng Việt (xem bản scan gốc)</li>
+                    <li><kbd>A</kbd> / <kbd>←</kbd>: Lùi về trang trước</li>
+                    <li><kbd>D</kbd> / <kbd>→</kbd>: Tiến tới trang sau</li>
+                    <li><kbd>F</kbd>: Bật/Tắt toàn màn hình</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Reader Viewport -->
+    <main id="reader-viewport" class="reader-container strip-mode">
+        <!-- Các trang truyện sẽ được render động bởi app.js vào đây -->
+        <div id="loading-spinner" class="loading-state">
+            <div class="spinner"></div>
+            <p>Đang nạp truyện tranh & bản dịch siêu tốc...</p>
+        </div>
+    </main>
+
+    <!-- Full-screen Drag & Drop Visual Overlay -->
+    <div id="drag-drop-overlay" class="drag-drop-overlay hidden">
+        <div class="drag-drop-content">
+            <div class="drop-icon">📥</div>
+            <h3>Thả file ảnh hoặc thư mục vào đây</h3>
+            <p>Tự động nhận diện các định dạng JPG, PNG, WEBP</p>
+        </div>
+    </div>
+
+    <!-- Upload Manga Modal -->
+    <div id="upload-modal" class="modal-backdrop hidden">
+        <div class="modal-card glass-panel">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="modal-icon">📁</span>
+                    <h3>Thêm Truyện Tranh Từ Máy Tính</h3>
+                </div>
+                <button id="btn-close-upload" class="close-btn" title="Đóng">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Dropzone Area -->
+                <div id="modal-dropzone" class="dropzone-area">
+                    <div class="dropzone-icon">🖼️</div>
+                    <div class="dropzone-text">
+                        <strong>Kéo thả các file ảnh hoặc thư mục vào đây</strong>
+                        <span>hoặc chọn qua các nút bên dưới</span>
+                    </div>
+                    <div class="dropzone-actions">
+                        <label class="btn-file-select">
+                            <span>📄 Chọn nhiều file ảnh</span>
+                            <input type="file" id="input-files" multiple accept="image/png, image/jpeg, image/webp" class="hidden-input">
+                        </label>
+                        <label class="btn-file-select secondary">
+                            <span>📁 Chọn cả thư mục</span>
+                            <input type="file" id="input-folder" webkitdirectory directory class="hidden-input">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Chapter Metadata Form -->
+                <div class="form-group">
+                    <label for="input-chapter-title">Tên tập truyện / chương:</label>
+                    <input type="text" id="input-chapter-title" placeholder="VD: One Piece Chương 1000" class="text-input">
+                </div>
+
+                <!-- Selected Files Preview List -->
+                <div id="upload-preview-container" class="preview-container hidden">
+                    <div class="preview-header">
+                        <span id="preview-count">0 ảnh đã chọn</span>
+                        <button type="button" id="btn-clear-files" class="text-btn">Xóa tất cả</button>
+                    </div>
+                    <div id="preview-list" class="preview-list"></div>
+                </div>
+
+                <!-- Upload Progress & Status -->
+                <div id="upload-progress-container" class="upload-progress-container hidden">
+                    <div class="progress-info">
+                        <span id="upload-status-text">Đang tải lên...</span>
+                        <span id="upload-percentage">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="upload-progress-bar" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancel-upload" class="modal-btn secondary">Hủy bỏ</button>
+                <button id="btn-start-upload" class="modal-btn primary" disabled>
+                    <span class="btn-spinner hidden" id="upload-spinner"></span>
+                    <span id="btn-start-upload-text">🚀 Bắt đầu dịch</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script điều khiển -->
+    <script src="app.js"></script>
+</body>
+</html>

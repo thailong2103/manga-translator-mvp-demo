@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài Đặt API & Mô Hình - MangaDex AI Translator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --bg-input: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-focus: #6366f1;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --accent: #a855f7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .badge-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 999px;
+            font-size: 13px;
+            color: #a5b4fc;
+            text-decoration: none;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .badge-nav:hover {
+            background: rgba(99, 102, 241, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Settings Card */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title span.icon {
+            font-size: 18px;
+        }
+
+        /* Pipeline & Provider Cards */
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .pipeline-card {
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .pipeline-card:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .pipeline-card.active {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.15);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .pipeline-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .badge-icon {
+            font-size: 22px;
+        }
+
+        .badge-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .tag-speed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .tag-vision {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .pipeline-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #f1f5f9;
+        }
+
+        .pipeline-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .provider-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .provider-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .provider-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .provider-card.active {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .provider-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+
+        .provider-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .mode-info-banner {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #c7d2fe;
+            line-height: 1.4;
+        }
+
+        .dimmed-section {
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        /* Preset Cards */
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 26px;
+        }
+
+        .preset-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .preset-btn:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .preset-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.18);
+            box-shadow: 0 0 16px var(--primary-glow);
+        }
+
+        .preset-name {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preset-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .form-label .hint {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+
+        .toggle-password-btn:hover {
+            color: var(--text-main);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Test Result Alert */
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-box.success {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #6ee7b7;
+        }
+
+        .alert-box.error {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+        }
+
+        .alert-box.info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #c7d2fe;
+        }
+
+        /* Buttons */
+        .actions-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 18px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.55);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.07);
+            color: #e2e8f0;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Navigation Header -->
+        <div class="header">
+            <a href="/" class="badge-nav">
+                <span>←</span>
+                <span>Quay lại Web Reader</span>
+            </a>
+            <h1 class="title">Cài Đặt API & Mô Hình AI</h1>
+            <p class="subtitle">Đổi khóa API, Base URL và Model dịch manga theo ý muốn của bạn</p>
+        </div>
+
+        <div class="card">
+            <!-- 1. PIPELINE SELECTOR -->
+            <div class="section-title">
+                <span class="icon">🚀</span>
+                <span>Phương Pháp Pipeline Xử Lý</span>
+            </div>
+
+            <div class="pipeline-grid" id="pipelineGrid">
+                <button type="button" class="pipeline-card active" data-pipeline="ocr_trans">
+                    <div class="pipeline-card-header">
+                        <span class="badge-icon">⚡</span>
+                        <span class="badge-tag tag-speed">Nhanh & Nhẹ</span>
+                    </div>
+                    <div class="pipeline-title">OCR + Trans (Bóc Chữ Trước)</div>
+                    <div class="pipeline-desc">Manga-OCR bóc chữ tiếng Nhật -> Gửi Google Dịch hoặc LLM Text. Tiết kiệm token, phản hồi tức thì.</div>
+                </button>
+
+                <button type="button" class="pipeline-card" data-pipeline="image_trans">
+                    <div class="pipeline-card-header">
+                        <span class="badge-icon">🖼️</span>
+                        <span class="badge-tag tag-vision">Vision AI</span>
+                    </div>
+                    <div class="pipeline-title">Image + Trans (Vision LLM)</div>
+                    <div class="pipeline-desc">Đánh số Set-of-Mark lên ảnh manga -> Gửi Vision AI (Qwen-VL / Gemini Vision) để đọc ảnh và dịch trực tiếp.</div>
+                </button>
+            </div>
+
+            <!-- 2. TRANSLATION PROVIDER (CHO OCR_TRANS) -->
+            <div id="ocrProvidersSection">
+                <div class="section-title" style="margin-top: 10px;">
+                    <span class="icon">🌐</span>
+                    <span>Bộ Dịch Cho Văn Bản Manga-OCR</span>
+                </div>
+                <div class="provider-grid" id="providerGrid">
+                    <button type="button" class="provider-card active" data-provider="google">
+                        <div class="provider-title">🌐 Google Translate</div>
+                        <div class="provider-desc">Miễn phí 100%, không cần API Key, siêu tốc (~150ms/trang)</div>
+                    </button>
+                    <button type="button" class="provider-card" data-provider="llm_text">
+                        <div class="provider-title">🤖 LLM Text-only</div>
+                        <div class="provider-desc">Gửi text lên Qwen/Gemini, hiểu ngữ cảnh mượt mà, siêu rẻ token</div>
+                    </button>
+                    <button type="button" class="provider-card" data-provider="raw">
+                        <div class="provider-title">📝 Manga OCR Raw</div>
+                        <div class="provider-desc">Giữ nguyên tiếng Nhật gốc lên ô thoại (học ngoại ngữ / đọc raw)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mode-info-banner" id="modeInfoBanner">
+                <span>💡</span>
+                <span id="modeInfoText">Đang dùng Google Translate: Bạn không cần cấu hình API Key bên dưới.</span>
+            </div>
+
+            <!-- Preset Selector -->
+            <div class="section-title" id="presetSectionTitle">
+                <span class="icon">⚡</span>
+                <span>Chọn Nhanh Nhà Cung Cấp LLM (Presets)</span>
+            </div>
+
+            <div class="presets-grid" id="presetsGrid">
+                <button type="button" class="preset-btn active" data-preset="xkiro_qwen">
+                    <div class="preset-name">xKiro Qwen 3.5 <span>✨</span></div>
+                    <div class="preset-desc">qwen/qwen3.5-flash:free</div>
+                </button>
+                <button type="button" class="preset-btn" data-preset="google_aistudio">
+                    <div class="preset-name">Google AI Studio <span>💎</span></div>
+                    <div class="preset-desc">gemini-2.0-flash (Chính chủ)</div>
+                </button>
+                <button type="button" class="preset-btn" data-preset="xkiro_gemini">
+                    <div class="preset-name">xKiro Gemini <span>⚡</span></div>
+                    <div class="preset-desc">google/gemini-2.5-flash</div>
+                </button>
+                <button type="button" class="preset-btn" data-preset="openrouter_gemini">
+                    <div class="preset-name">OpenRouter Gemini <span>🌐</span></div>
+                    <div class="preset-desc">google/gemini-2.0-flash-001</div>
+                </button>
+                <button type="button" class="preset-btn" data-preset="custom">
+                    <div class="preset-name">Tùy Chỉnh <span>🛠️</span></div>
+                    <div class="preset-desc">OpenAI / Ollama / Local</div>
+                </button>
+            </div>
+
+            <!-- Alert Notification -->
+            <div class="alert-box" id="alertBox"></div>
+
+            <!-- Form -->
+            <form id="configForm">
+                <!-- Base URL -->
+                <div class="form-group">
+                    <label class="form-label" for="baseUrl">
+                        <span>API Base URL</span>
+                        <span class="hint">Endpoint tương thích OpenAI</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="baseUrl" class="form-input" placeholder="https://api.xkiro.com/v1" required>
+                    </div>
+                </div>
+
+                <!-- API Key -->
+                <div class="form-group">
+                    <label class="form-label" for="apiKey">
+                        <span>API Key</span>
+                        <span class="hint">Khóa truy cập cá nhân của bạn</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="password" id="apiKey" class="form-input" placeholder="sk-..." required>
+                        <button type="button" class="toggle-password-btn" id="toggleKeyBtn" title="Xem/Ẩn API Key">👁️</button>
+                    </div>
+                </div>
+
+                <!-- Model Name -->
+                <div class="form-group">
+                    <label class="form-label" for="modelName">
+                        <span>Tên Mô Hình (Model Name)</span>
+                        <span class="hint">Model hỗ trợ Vision và JSON</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="modelName" class="form-input" placeholder="qwen/qwen3.5-flash:free" required>
+                    </div>
+                </div>
+
+                <!-- Grid thông số phụ -->
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="serverPort">
+                            <span>Cổng Local Server</span>
+                        </label>
+                        <input type="number" id="serverPort" class="form-input" value="8765" readonly title="Cổng dịch vụ">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="maxWorkers">
+                            <span>Số Luồng API Song Song</span>
+                        </label>
+                        <input type="number" id="maxWorkers" class="form-input" value="10" min="1" max="20">
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="actions-group">
+                    <button type="button" class="btn btn-secondary" id="btnTestApi">
+                        <span id="testIcon">🧪</span>
+                        <span id="testText">Kiểm Tra API</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveConfig">
+                        <span id="saveIcon">💾</span>
+                        <span id="saveText">Lưu Cấu Hình</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="footer">
+            <span>MangaDex AI Translator • Giao diện cấu hình Backend & Extension</span>
+        </div>
+    </div>
+
+    <script>
+        const PRESETS = {
+            xkiro_qwen: {
+                baseUrl: 'https://api.xkiro.com/v1',
+                model: 'qwen/qwen3.5-flash:free',
+            },
+            google_aistudio: {
+                baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+                model: 'gemini-2.0-flash',
+            },
+            xkiro_gemini: {
+                baseUrl: 'https://api.xkiro.com/v1',
+                model: 'google/gemini-2.5-flash',
+            },
+            openrouter_gemini: {
+                baseUrl: 'https://openrouter.ai/api/v1',
+                model: 'google/gemini-2.0-flash-001',
+            },
+            custom: {}
+        };
+
+        const elements = {
+            baseUrl: document.getElementById('baseUrl'),
+            apiKey: document.getElementById('apiKey'),
+            modelName: document.getElementById('modelName'),
+            serverPort: document.getElementById('serverPort'),
+            maxWorkers: document.getElementById('maxWorkers'),
+            toggleKeyBtn: document.getElementById('toggleKeyBtn'),
+            btnTestApi: document.getElementById('btnTestApi'),
+            btnSaveConfig: document.getElementById('btnSaveConfig'),
+            testIcon: document.getElementById('testIcon'),
+            testText: document.getElementById('testText'),
+            saveIcon: document.getElementById('saveIcon'),
+            saveText: document.getElementById('saveText'),
+            alertBox: document.getElementById('alertBox'),
+            configForm: document.getElementById('configForm'),
+            presetButtons: document.querySelectorAll('.preset-btn')
+        };
+
+        let currentPipeline = 'ocr_trans';
+        let currentProvider = 'google';
+
+        const pipelineButtons = document.querySelectorAll('.pipeline-card');
+        const providerButtons = document.querySelectorAll('.provider-card');
+        const ocrProvidersSection = document.getElementById('ocrProvidersSection');
+        const modeInfoBanner = document.getElementById('modeInfoBanner');
+        const modeInfoText = document.getElementById('modeInfoText');
+        const presetSectionTitle = document.getElementById('presetSectionTitle');
+        const presetsGrid = document.getElementById('presetsGrid');
+
+        function updateModeUI() {
+            pipelineButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-pipeline') === currentPipeline);
+            });
+
+            if (currentPipeline === 'image_trans') {
+                if (ocrProvidersSection) ocrProvidersSection.style.display = 'none';
+                if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
+                if (modeInfoText) modeInfoText.textContent = '🖼️ Image + Trans (Vision AI): Dùng mô hình Multimodal Vision LLM đọc ảnh Set-of-Mark và dịch trực tiếp.';
+                elements.apiKey.required = true;
+                elements.baseUrl.required = true;
+                elements.modelName.required = true;
+                if (presetSectionTitle) presetSectionTitle.style.display = 'flex';
+                if (presetsGrid) {
+                    presetsGrid.style.display = 'grid';
+                    presetsGrid.classList.remove('dimmed-section');
+                }
+            } else {
+                if (ocrProvidersSection) ocrProvidersSection.style.display = 'block';
+                providerButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-provider') === currentProvider);
+                });
+
+                if (currentProvider === 'google') {
+                    if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
+                    if (modeInfoText) modeInfoText.textContent = '🌐 Manga-OCR + Google Translate: Chạy bóc chữ offline và dịch Google miễn phí. Không bắt buộc cấu hình API Key bên dưới.';
+                    elements.apiKey.required = false;
+                    elements.baseUrl.required = false;
+                    elements.modelName.required = false;
+                    if (presetsGrid) presetsGrid.classList.add('dimmed-section');
+                } else if (currentProvider === 'raw') {
+                    if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
+                    if (modeInfoText) modeInfoText.textContent = '📝 Manga-OCR Raw: Bóc tách và giữ nguyên chữ gốc tiếng Nhật 100% offline. Không cần API Key.';
+                    elements.apiKey.required = false;
+                    elements.baseUrl.required = false;
+                    elements.modelName.required = false;
+                    if (presetsGrid) presetsGrid.classList.add('dimmed-section');
+                } else {
+                    if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
+                    if (modeInfoText) modeInfoText.textContent = '🤖 Manga-OCR + LLM Text-only: Manga-OCR bóc chữ rồi gửi text thuần lên LLM. Tiết kiệm token, dịch mượt theo ngữ cảnh!';
+                    elements.apiKey.required = true;
+                    elements.baseUrl.required = true;
+                    elements.modelName.required = true;
+                    if (presetsGrid) presetsGrid.classList.remove('dimmed-section');
+                }
+            }
+        }
+
+        pipelineButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPipeline = btn.getAttribute('data-pipeline');
+                updateModeUI();
+            });
+        });
+
+        providerButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentProvider = btn.getAttribute('data-provider');
+                updateModeUI();
+            });
+        });
+
+        function showAlert(type, message) {
+            elements.alertBox.className = `alert-box ${type}`;
+            elements.alertBox.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            elements.alertBox.style.display = 'flex';
+        }
+
+        function hideAlert() {
+            elements.alertBox.style.display = 'none';
+        }
+
+        // Toggle password visibility
+        elements.toggleKeyBtn.addEventListener('click', () => {
+            const isPassword = elements.apiKey.type === 'password';
+            elements.apiKey.type = isPassword ? 'text' : 'password';
+            elements.toggleKeyBtn.textContent = isPassword ? '🔒' : '👁️';
+        });
+
+        // Preset button click
+        elements.presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                elements.presetButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const presetKey = btn.getAttribute('data-preset');
+                const p = PRESETS[presetKey];
+                if (p && p.baseUrl) {
+                    elements.baseUrl.value = p.baseUrl;
+                    elements.modelName.value = p.model;
+                }
+            });
+        });
+
+        // Nạp cấu hình hiện tại từ Server
+        async function loadCurrentConfig() {
+            try {
+                const res = await fetch('/api/config?full=1');
+                if (res.ok) {
+                    const data = await res.json();
+                    elements.baseUrl.value = data.base_url || '';
+                    elements.apiKey.value = data.api_key || '';
+                    elements.modelName.value = data.model || '';
+                    elements.serverPort.value = data.server_port || 8765;
+                    elements.maxWorkers.value = data.max_workers || 10;
+
+                    currentPipeline = data.pipeline_type || 'ocr_trans';
+                    currentProvider = data.translation_provider || 'google';
+                    updateModeUI();
+
+                    // Nhận diện preset tương ứng nếu có
+                    let matchedPreset = 'custom';
+                    for (const [key, p] of Object.entries(PRESETS)) {
+                        if (p.baseUrl === data.base_url && p.model === data.model) {
+                            matchedPreset = key;
+                            break;
+                        }
+                    }
+                    elements.presetButtons.forEach(b => {
+                        b.classList.toggle('active', b.getAttribute('data-preset') === matchedPreset);
+                    });
+                }
+            } catch (err) {
+                showAlert('error', 'Không thể kết nối đến server backend để nạp cấu hình!');
+            }
+        }
+
+        // Kiểm tra API
+        elements.btnTestApi.addEventListener('click', async () => {
+            const baseUrl = elements.baseUrl.value.trim();
+            const apiKey = elements.apiKey.value.trim();
+            const model = elements.modelName.value.trim();
+
+            if (!baseUrl || !apiKey || !model) {
+                showAlert('error', 'Vui lòng điền đủ Base URL, API Key và Model trước khi kiểm tra!');
+                return;
+            }
+
+            elements.btnTestApi.disabled = true;
+            elements.testIcon.className = 'spinner';
+            elements.testIcon.textContent = '';
+            elements.testText.textContent = 'Đang kiểm tra...';
+            hideAlert();
+
+            const t0 = performance.now();
+            try {
+                const res = await fetch('/api/test-api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ base_url: baseUrl, api_key: apiKey, model })
+                });
+                const data = await res.json();
+                const latency = Math.round(performance.now() - t0);
+
+                if (data.ok) {
+                    showAlert('success', `Kết nối thành công (${latency}ms)! Model phản hồi: "${data.reply || 'OK'}"`);
+                } else {
+                    showAlert('error', `Kiểm tra thất bại: ${data.message || 'Lỗi không xác định'}`);
+                }
+            } catch (err) {
+                showAlert('error', `Lỗi mạng khi kết nối tới máy chủ local: ${err.message}`);
+            } finally {
+                elements.btnTestApi.disabled = false;
+                elements.testIcon.className = '';
+                elements.testIcon.textContent = '🧪';
+                elements.testText.textContent = 'Kiểm Tra API';
+            }
+        });
+
+        // Lưu Cấu Hình
+        elements.configForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                pipeline_type: currentPipeline,
+                translation_provider: currentPipeline === 'image_trans' ? 'vision_llm' : currentProvider,
+                base_url: elements.baseUrl.value.trim(),
+                api_key: elements.apiKey.value.trim(),
+                model: elements.modelName.value.trim(),
+                server_port: parseInt(elements.serverPort.value, 10) || 8765,
+                max_workers: parseInt(elements.maxWorkers.value, 10) || 10
+            };
+
+            elements.btnSaveConfig.disabled = true;
+            elements.saveIcon.className = 'spinner';
+            elements.saveIcon.textContent = '';
+            elements.saveText.textContent = 'Đang lưu...';
+            hideAlert();
+
+            try {
+                const res = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    showAlert('success', 'Đã lưu cấu hình mới thành công! Hệ thống dịch đã sẵn sàng.');
+                } else {
+                    showAlert('error', `Không thể lưu cấu hình: ${data.message || 'Lỗi server'}`);
+                }
+            } catch (err) {
+                showAlert('error', `Lỗi khi lưu cấu hình: ${err.message}`);
+            } finally {
+                elements.btnSaveConfig.disabled = false;
+                elements.saveIcon.className = '';
+                elements.saveIcon.textContent = '💾';
+                elements.saveText.textContent = 'Lưu Cấu Hình';
+            }
+        });
+
+        loadCurrentConfig();
+    </script>
+</body>
+</html>
