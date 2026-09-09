@@ -13,6 +13,14 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.j
 config_lock = threading.Lock()
 
 DEFAULT_PROFILES = {
+    "xkiro_deepseek": {
+        "id": "xkiro_deepseek",
+        "name": "xKiro DeepSeek V4 Flash",
+        "base_url": "https://api.xkiro.com/v1",
+        "model": "deepseek/deepseek-v4-flash",
+        "api_key": "",
+        "is_builtin": True
+    },
     "xkiro_qwen": {
         "id": "xkiro_qwen",
         "name": "xKiro Qwen 3.5 Flash",
@@ -48,11 +56,11 @@ DEFAULT_PROFILES = {
 }
 
 DEFAULT_CONFIG = {
-    "active_profile": "xkiro_qwen",
+    "active_profile": "xkiro_deepseek",
     "profiles": DEFAULT_PROFILES,
     "api_key": "",
     "base_url": "https://api.xkiro.com/v1",
-    "model": "qwen/qwen3.5-flash:free",
+    "model": "deepseek/deepseek-v4-flash",
     "source_lang": "tiếng Anh (hoặc tiếng Nhật gốc)",
     "target_lang": "tiếng Việt",
     "server_port": 8765,

@@ -650,20 +650,28 @@ def translate_with_google(text_list, target_lang="vi"):
 # =====================================================================
 # 8. LLM TEXT-ONLY TRANSLATOR (DỊCH TEXT THUẦN QUA OPENAI/QWEN/GEMINI)
 # =====================================================================
-def call_llm_text_translator(api_key, base_url, model, bubble_items):
+def call_llm_text_translator(api_key, base_url, model, bubble_items, source_lang=None, target_lang=None):
     """
-    Gửi danh sách text thuần bóc tách từ Manga-OCR lên LLM để dịch sang tiếng Việt.
+    Gửi danh sách text thuần bóc tách từ OCR lên LLM để dịch sang tiếng Việt.
     Không gửi ảnh, tiết kiệm token tối đa, dịch tự nhiên theo ngữ cảnh toàn trang.
+    Tự động fallback sang Google Translate nếu LLM API gặp lỗi (như HTTP 500 / Timeout).
     bubble_items: [{"id": 1, "text": "..."}, {"id": 2, "text": "..."}]
     """
     if not bubble_items:
         return []
 
+    src_desc = source_lang or SOURCE_LANG
+    tgt_desc = target_lang or TARGET_LANG
+
     prompt = (
-        f"Bạn là chuyên gia dịch truyện tranh manga chuyên nghiệp. "
-        f"Hãy dịch các lời thoại sau từ {SOURCE_LANG} sang {TARGET_LANG} tự nhiên, chuẩn văn phong truyện tranh manga:\n"
+        f"Bạn là chuyên gia dịch truyện tranh manga/comic chuyên nghiệp.\n"
+        f"Hãy dịch toàn bộ lời thoại sau từ {src_desc} sang {tgt_desc} tự nhiên, chuẩn văn phong truyện tranh tiếng Việt:\n"
         f"{json.dumps(bubble_items, ensure_ascii=False, indent=2)}\n\n"
-        f"Yêu cầu: Trả về đúng định dạng JSON: [ {{\"id\": 1, \"vi\": \"...\"}}, {{\"id\": 2, \"vi\": \"...\"}} ]"
+        f"Quy tắc quan trọng:\n"
+        f"- Giữ nguyên chính xác trường \"id\" cho từng câu thoại tương ứng.\n"
+        f"- Dịch thoát ý, mượt mà, phù hợp ngữ cảnh đối thoại manga/comic.\n"
+        f"- Chỉ trả về duy nhất mảng JSON hợp lệ, không thêm bất kỳ văn bản giải thích nào:\n"
+        f"[ {{\"id\": 1, \"vi\": \"...\"}}, {{\"id\": 2, \"vi\": \"...\"}} ]"
     )
 
     payload = {
@@ -682,39 +690,68 @@ def call_llm_text_translator(api_key, base_url, model, bubble_items):
         "Content-Type": "application/json"
     }
 
-    for attempt in range(3):
-        try:
-            with httpx.Client(timeout=20.0) as client:
-                resp = client.post(f"{base_url.rstrip('/')}/chat/completions", json=payload, headers=headers)
-            if resp.status_code == 200:
-                resp_json = resp.json()
-                text = resp_json["choices"][0]["message"]["content"]
-                clean_text = re.sub(r"^```(?:json)?\s*", "", text.strip())
-                clean_text = re.sub(r"\s*```$", "", clean_text)
-                parsed = json.loads(clean_text)
+    last_error = None
+    if api_key and base_url and model:
+        for attempt in range(3):
+            try:
+                with httpx.Client(timeout=25.0) as client:
+                    resp = client.post(f"{base_url.rstrip('/')}/chat/completions", json=payload, headers=headers)
+                if resp.status_code == 200:
+                    resp_json = resp.json()
+                    text = resp_json["choices"][0]["message"]["content"].strip()
+                    
+                    # Tìm mảng JSON [...] trong câu trả lời
+                    m_arr = re.search(r'\[[\s\S]*\]', text)
+                    json_str = m_arr.group(0) if m_arr else text
+                    clean_str = re.sub(r"^```(?:json)?\s*", "", json_str.strip())
+                    clean_str = re.sub(r"\s*```$", "", clean_str)
+                    
+                    try:
+                        parsed = json.loads(clean_str)
+                        if isinstance(parsed, list):
+                            return parsed
+                        elif isinstance(parsed, dict):
+                            for val in parsed.values():
+                                if isinstance(val, list):
+                                    return val
+                            return [parsed]
+                    except Exception:
+                        pass
+                    
+                    # Regex fallback bóc id và vi nếu JSON chứa ký tự thoát bất thường
+                    m_items = []
+                    for m in re.finditer(r'\{\s*["\']id["\']\s*:\s*(\d+)\s*,\s*["\']vi["\']\s*:\s*["\']([\s\S]*?)["\']\s*\}', text):
+                        m_items.append({"id": int(m.group(1)), "vi": m.group(2).replace('\\"', '"').replace('\\n', ' ').strip()})
+                    if m_items:
+                        return m_items
+                    
+                    raise ValueError(f"Không thể phân tích mảng JSON từ phản hồi LLM: {text[:150]}")
+                elif resp.status_code in (429, 503):
+                    time.sleep(1.5 * (attempt + 1))
+                else:
+                    raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+            except Exception as e:
+                last_error = e
+                if attempt < 2:
+                    time.sleep(1.0)
+    else:
+        last_error = "Chưa cấu hình API Key hoặc Model"
 
-                if isinstance(parsed, dict):
-                    for val in parsed.values():
-                        if isinstance(val, list):
-                            return val
-                    return [parsed]
-                return parsed
-            elif resp.status_code in (429, 503):
-                time.sleep(1.5 * (attempt + 1))
-            else:
-                raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
-        except json.JSONDecodeError:
-            m = re.findall(r'\{\s*"id"\s*:\s*(\d+)\s*,\s*"vi"\s*:\s*"([^"]+)"\s*\}', text)
-            if m:
-                return [{"id": int(i), "vi": v} for i, v in m]
-            return []
-        except Exception as e:
-            if attempt == 2:
-                print(f"⚠️ Lỗi LLM Text Translator: {e}")
-                return []
-            time.sleep(1.0)
-
-    return []
+    # FALLBACK TỰ ĐỘNG SANG GOOGLE TRANSLATE ĐỂ TRÁNH GIỮ NGUYÊN CHỮ GỐC
+    print(f"⚠️ [LLM Text Fallback] Lỗi gọi API LLM ({last_error}), tự động chuyển sang Google Translate...")
+    try:
+        raw_texts = [b.get("text", "") for b in bubble_items]
+        vi_texts = translate_with_google(raw_texts, target_lang="vi")
+        fallback_res = []
+        for idx, b in enumerate(bubble_items):
+            fallback_res.append({
+                "id": b.get("id"),
+                "vi": vi_texts[idx] if idx < len(vi_texts) and vi_texts[idx] else b.get("text", "")
+            })
+        return fallback_res
+    except Exception as g_err:
+        print(f"❌ Fallback Google Translate cũng gặp lỗi: {g_err}")
+        return []
 
 # =====================================================================
 # 9. XỬ LÝ 1 TRANG ĐỘC LẬP (DETECT -> MARK -> TRANSLATE)
@@ -1040,15 +1077,22 @@ def process_pages_stream(chapter_id: str, title_str: str, pages_tasks: list,
             elif translation_provider == "llm_text":
                 def _llm_text_task(p, b_list, t_p_start, w_img, h_img, p_path, d_ms, o_ms):
                     bubble_items = [{"id": b["id"], "text": b.get("raw", "")} for b in b_list]
-                    translations = call_llm_text_translator(api_key, base_url, model, bubble_items)
+                    if ocr_engine == "rapid_ocr_en":
+                        src_l = "tiếng Anh"
+                    elif ocr_engine == "rapid_ocr_ch":
+                        src_l = "tiếng Trung"
+                    else:
+                        src_l = "tiếng Nhật"
+                    translations = call_llm_text_translator(api_key, base_url, model, bubble_items, source_lang=src_l)
                     trans_map = {item.get("id"): item.get("vi", "") for item in translations if isinstance(item, dict)}
                     b_res = []
                     for b in b_list:
                         bid = b["id"]
+                        trans_text = trans_map.get(bid, "")
                         b_res.append({
                             "id": bid,
                             "box": b["box"],
-                            "vi": trans_map.get(bid, b.get("raw", "")),
+                            "vi": trans_text if trans_text.strip() else b.get("raw", ""),
                             "raw": b.get("raw", "")
                         })
                     t_done = time.perf_counter()

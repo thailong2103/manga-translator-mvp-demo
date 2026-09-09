@@ -151,6 +151,25 @@
     }
 
     // =========================================================================
+    // THƯ VIỆN VECTOR SVG HAND-DRAWN LINE ICONS (NÉT CHÌ PHÁC THẢO THUẦN TÚY)
+    // =========================================================================
+    const SKETCH_ICONS = {
+        lightning: `<svg class="sketch-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+        gear: `<svg class="sketch-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+        close: `<svg class="sketch-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        translate: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"></path></svg>`,
+        refresh: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l6.73-1.19"></path></svg>`,
+        eye: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+        eyeOff: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`,
+        save: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`,
+        flask: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M10 2v7.31L4.14 20.37A2 2 0 0 0 5.86 23h12.28a2 2 0 0 0 1.72-2.63L14 9.31V2"></path><line x1="8.5" y1="2" x2="15.5" y2="2"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>`,
+        key: `<svg class="sketch-icon" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"></circle><path d="m21 3-9.5 9.5M15.5 7.5l3 3M18.5 4.5l3 3"></path></svg>`,
+        image: `<svg class="sketch-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`,
+        book: `<svg class="sketch-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
+        arrowLeft: `<svg class="sketch-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`,
+    };
+
+    // =========================================================================
     // SHADOW DOM UI WIDGET (FLOATING ACTION BUTTON & POPOVER PANEL)
     // =========================================================================
     class MangaOverlayUI {
@@ -179,19 +198,46 @@
         render() {
             setSafeHTML(this.shadowRoot, `
                 <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap');
+
                     :host {
                         all: initial;
-                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        font-family: 'Patrick Hand', 'Comic Neue', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, cursive, sans-serif;
                         z-index: 999999;
                         position: fixed;
                         bottom: 24px;
                         right: 24px;
                         pointer-events: none;
                         user-select: none;
+                        --border-pencil: #2d2d2d;
+                        --bg-paper: #fdfbf7;
+                        --marker-red: #ff4d4d;
+                        --pen-blue: #2d5da1;
+                        --postit-yellow: #fff9c4;
                     }
 
                     * {
                         box-sizing: border-box;
+                    }
+
+                    /* Hand-Drawn Sketch SVG Line Icons */
+                    .sketch-icon {
+                        width: 16px;
+                        height: 16px;
+                        stroke: var(--border-pencil);
+                        stroke-width: 2.2;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        fill: none;
+                        vertical-align: -2px;
+                        display: inline-block;
+                        flex-shrink: 0;
+                        transition: stroke 0.15s ease, transform 0.15s ease;
+                    }
+
+                    .sketch-icon.lg {
+                        width: 24px;
+                        height: 24px;
                     }
 
                     .widget-container {
@@ -202,89 +248,91 @@
                         pointer-events: auto;
                     }
 
-                    /* 1. NÚT NỔI THU NHỎ (FLOATING ACTION BUTTON) */
+                    /* 1. NÚT NỔI THU NHỎ (FLOATING ACTION BUTTON) - HAND-DRAWN STAMP */
                     .fab-button {
-                        width: 50px;
-                        height: 50px;
+                        width: 52px;
+                        height: 52px;
                         border-radius: 50%;
-                        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-                        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+                        background: #fff9c4;
+                        border: 2.5px solid var(--border-pencil);
+                        box-shadow: 3px 3px 0px var(--border-pencil);
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         cursor: pointer;
-                        border: 2px solid rgba(255, 255, 255, 0.2);
-                        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
                         position: relative;
                     }
 
                     .fab-button:hover {
-                        transform: scale(1.08) translateY(-2px);
-                        box-shadow: 0 8px 28px rgba(99, 102, 241, 0.6), 0 4px 12px rgba(0, 0, 0, 0.25);
+                        transform: translate(-2px, -2px);
+                        box-shadow: 5px 5px 0px var(--border-pencil);
+                        background: #fff3a8;
                     }
 
                     .fab-button:active {
-                        transform: scale(0.95);
+                        transform: translate(2px, 2px);
+                        box-shadow: 1px 1px 0px var(--border-pencil);
                     }
 
-                    .fab-icon {
+                    .fab-button .sketch-icon {
                         width: 26px;
                         height: 26px;
-                        fill: white;
-                        transition: transform 0.3s ease;
+                        stroke: var(--border-pencil);
+                        stroke-width: 2.4;
+                        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
                     }
 
-                    .fab-button.open .fab-icon {
-                        transform: rotate(90deg);
+                    .fab-button.open .sketch-icon {
+                        transform: rotate(45deg);
                     }
 
                     /* Đèn trạng thái server */
                     .status-dot {
                         position: absolute;
-                        top: 2px;
-                        right: 2px;
-                        width: 12px;
-                        height: 12px;
+                        top: -1px;
+                        right: -1px;
+                        width: 14px;
+                        height: 14px;
                         border-radius: 50%;
-                        border: 2px solid #0f172a;
+                        border: 2px solid var(--border-pencil);
                         background: #94a3b8;
                         transition: background 0.3s ease;
                     }
 
-                    .status-dot.connected { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+                    .status-dot.connected { background: #22c55e; }
                     .status-dot.translating {
                         background: #f59e0b;
-                        box-shadow: 0 0 10px #f59e0b;
                         animation: pulse-ring 1.2s infinite;
                     }
-                    .status-dot.ready { background: #38bdf8; box-shadow: 0 0 8px #38bdf8; }
+                    .status-dot.ready { background: #38bdf8; }
                     .status-dot.disconnected { background: #ef4444; }
 
                     @keyframes pulse-ring {
-                        0% { transform: scale(0.9); opacity: 1; }
-                        50% { transform: scale(1.3); opacity: 0.6; }
-                        100% { transform: scale(0.9); opacity: 1; }
+                        0% { transform: scale(0.9); }
+                        50% { transform: scale(1.25); }
+                        100% { transform: scale(0.9); }
                     }
 
-                    /* 2. BẢNG ĐIỀU KHIỂN POPOVER */
+                    /* 2. BẢNG ĐIỀU KHIỂN POPOVER - SỔ TAY MANGA NOTEBOOK */
                     .popover-panel {
                         position: absolute;
-                        bottom: 64px;
+                        bottom: 66px;
                         right: 0;
-                        width: 310px;
-                        background: rgba(15, 23, 42, 0.94);
-                        backdrop-filter: blur(16px);
-                        -webkit-backdrop-filter: blur(16px);
-                        border: 1px solid rgba(255, 255, 255, 0.12);
-                        border-radius: 16px;
-                        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
-                        color: #f8fafc;
+                        width: 320px;
+                        background: var(--bg-paper);
+                        background-image: radial-gradient(#e5e0d8 1.2px, transparent 1.2px);
+                        background-size: 16px 16px;
+                        border: 2.5px solid var(--border-pencil);
+                        border-radius: 14px;
+                        box-shadow: 5px 5px 0px var(--border-pencil);
+                        color: var(--border-pencil);
                         overflow: hidden;
                         opacity: 0;
                         transform: translateY(12px) scale(0.95);
                         transform-origin: bottom right;
                         pointer-events: none;
-                        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
                     }
 
                     .popover-panel.open {
@@ -293,83 +341,84 @@
                         pointer-events: auto;
                     }
 
+                    /* Băng dính Washi Tape trang trí */
+                    .tape-strip {
+                        position: absolute;
+                        top: -8px;
+                        left: 50%;
+                        transform: translateX(-50%) rotate(-1deg);
+                        width: 80px;
+                        height: 18px;
+                        background: rgba(229, 224, 216, 0.85);
+                        border: 1px dashed rgba(45, 45, 45, 0.4);
+                        pointer-events: none;
+                        z-index: 2;
+                    }
+
                     .panel-header {
-                        padding: 14px 16px;
+                        padding: 12px 14px;
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
-                        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-                        background: rgba(255, 255, 255, 0.02);
+                        border-bottom: 2px solid var(--border-pencil);
+                        background: #ffffff;
                     }
 
                     .panel-title {
-                        font-size: 14px;
+                        font-family: 'Kalam', cursive, sans-serif;
+                        font-size: 15px;
                         font-weight: 700;
                         display: flex;
                         align-items: center;
-                        gap: 8px;
-                        background: linear-gradient(135deg, #a5b4fc, #c084fc);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
+                        gap: 6px;
+                        color: var(--border-pencil);
                     }
 
                     .header-actions {
                         display: flex;
                         align-items: center;
-                        gap: 4px;
+                        gap: 6px;
                     }
 
-                    .gear-btn {
-                        background: none;
-                        border: none;
-                        color: #94a3b8;
+                    .gear-btn, .close-btn {
+                        background: #ffffff;
+                        border: 1.5px solid var(--border-pencil);
+                        color: var(--border-pencil);
                         cursor: pointer;
-                        font-size: 15px;
                         line-height: 1;
-                        padding: 4px;
+                        padding: 5px;
                         border-radius: 6px;
+                        box-shadow: 1.5px 1.5px 0px var(--border-pencil);
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        transition: all 0.2s ease;
+                        transition: all 0.15s ease;
                     }
 
-                    .gear-btn:hover {
-                        color: #818cf8;
-                        background: rgba(99, 102, 241, 0.15);
-                        transform: rotate(30deg);
+                    .gear-btn:hover, .close-btn:hover {
+                        background: #fff9c4;
+                        transform: translate(-1px, -1px);
+                        box-shadow: 2.5px 2.5px 0px var(--border-pencil);
+                    }
+
+                    .gear-btn:active, .close-btn:active {
+                        transform: translate(1px, 1px);
+                        box-shadow: 0px 0px 0px var(--border-pencil);
                     }
 
                     .gear-btn.active {
-                        color: #a5b4fc;
-                        background: rgba(99, 102, 241, 0.25);
+                        background: #2d5da1;
+                        color: #ffffff;
                     }
-
-                    .close-btn {
-                        background: none;
-                        border: none;
-                        color: #94a3b8;
-                        cursor: pointer;
-                        font-size: 18px;
-                        line-height: 1;
-                        padding: 4px;
-                        border-radius: 6px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: color 0.2s, background 0.2s;
-                    }
-
-                    .close-btn:hover {
-                        color: #fff;
-                        background: rgba(255, 255, 255, 0.1);
+                    .gear-btn.active .sketch-icon {
+                        stroke: #ffffff;
                     }
 
                     .panel-body {
-                        padding: 14px 16px;
+                        padding: 12px 14px;
                         display: flex;
                         flex-direction: column;
-                        gap: 12px;
+                        gap: 10px;
                         max-height: 480px;
                         overflow-y: auto;
                     }
@@ -377,7 +426,7 @@
                     .view-container {
                         display: flex;
                         flex-direction: column;
-                        gap: 12px;
+                        gap: 10px;
                         width: 100%;
                     }
 
@@ -385,69 +434,325 @@
                         display: none;
                     }
 
-                    /* Presets Pills */
-                    .presets-pills {
+                    /* Post-It Status Card */
+                    .status-card {
+                        background: #fff9c4;
+                        border: 1.5px dashed var(--border-pencil);
+                        border-radius: 8px;
+                        padding: 8px 10px;
+                        font-size: 13px;
                         display: flex;
-                        gap: 6px;
-                        overflow-x: auto;
-                        padding-bottom: 2px;
+                        flex-direction: column;
+                        gap: 4px;
+                        box-shadow: 2px 2px 0px var(--border-pencil);
+                        transform: rotate(-0.5deg);
                     }
 
-                    .preset-pill {
-                        background: rgba(255, 255, 255, 0.06);
-                        border: 1px solid rgba(255, 255, 255, 0.1);
-                        color: #cbd5e1;
-                        font-size: 11px;
+                    .status-line {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+
+                    .status-label {
+                        color: #555555;
                         font-weight: 600;
-                        padding: 4px 8px;
+                    }
+
+                    .status-value {
+                        font-weight: 700;
+                        color: var(--border-pencil);
+                    }
+
+                    /* Thanh tiến trình phác thảo */
+                    .progress-bar-container {
+                        width: 100%;
+                        height: 7px;
+                        background: #ffffff;
+                        border: 1.5px solid var(--border-pencil);
+                        border-radius: 4px;
+                        overflow: hidden;
+                        margin-top: 4px;
+                        display: none;
+                    }
+
+                    .progress-bar-fill {
+                        height: 100%;
+                        background: #ff4d4d;
+                        width: 0%;
+                        transition: width 0.3s ease;
+                    }
+
+                    /* Mode Switcher Notebook Tabs */
+                    .mode-switcher-container {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        background: #ffffff;
+                        border: 2px solid var(--border-pencil);
+                        border-radius: 8px;
+                        padding: 8px;
+                        box-shadow: 2px 2px 0px var(--border-pencil);
+                    }
+
+                    .mode-tabs {
+                        display: flex;
+                        gap: 4px;
+                        background: #f1ede4;
+                        border: 1.5px solid var(--border-pencil);
                         border-radius: 6px;
+                        padding: 2px;
+                    }
+
+                    .mode-tab {
+                        flex: 1;
+                        padding: 5px 8px;
+                        font-family: 'Kalam', cursive, sans-serif;
+                        font-size: 12px;
+                        font-weight: 700;
+                        border-radius: 4px;
+                        border: none;
+                        background: transparent;
+                        color: #555555;
                         cursor: pointer;
-                        white-space: nowrap;
                         transition: all 0.15s ease;
+                        text-align: center;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 4px;
                     }
 
-                    .preset-pill:hover {
-                        background: rgba(99, 102, 241, 0.2);
-                        border-color: #6366f1;
-                        color: white;
+                    .mode-tab:hover {
+                        color: var(--border-pencil);
                     }
 
-                    .preset-pill.active {
-                        background: #4f46e5;
-                        border-color: #818cf8;
-                        color: white;
+                    .mode-tab.active {
+                        background: var(--border-pencil);
+                        color: #ffffff;
+                    }
+                    .mode-tab.active .sketch-icon {
+                        stroke: #ffffff;
                     }
 
-                    /* Form Inputs */
-                    .form-input-group {
+                    /* Sub-pills (OCR engine & Translation provider) */
+                    .sub-providers-row {
+                        display: flex;
+                        gap: 4px;
+                        justify-content: space-between;
+                    }
+
+                    .sub-pill {
+                        flex: 1;
+                        font-family: 'Patrick Hand', cursive, sans-serif;
+                        font-size: 12px;
+                        font-weight: 600;
+                        padding: 3px 4px;
+                        border-radius: 5px;
+                        border: 1.5px solid var(--border-pencil);
+                        background: #ffffff;
+                        color: var(--border-pencil);
+                        cursor: pointer;
+                        text-align: center;
+                        transition: all 0.12s ease;
+                        white-space: nowrap;
+                    }
+
+                    .sub-pill:hover {
+                        background: #fff9c4;
+                        transform: translateY(-1px);
+                    }
+
+                    .sub-pill.active {
+                        background: #2d5da1;
+                        color: #ffffff;
+                        box-shadow: 1.5px 1.5px 0px var(--border-pencil);
+                    }
+
+                    /* Auto detect bar */
+                    #ocrAutoDetectBar {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        font-size: 12px;
+                        padding: 4px 8px;
+                        background: #fdfbf7;
+                        border-radius: 6px;
+                        border: 1.5px dashed var(--border-pencil);
+                    }
+
+                    #btnToggleAutoLang {
+                        background: #ffffff;
+                        border: 1.5px solid var(--border-pencil);
+                        color: var(--border-pencil);
+                        border-radius: 4px;
+                        font-size: 11px;
+                        cursor: pointer;
+                        padding: 1px 8px;
+                        box-shadow: 1px 1px 0px var(--border-pencil);
+                        font-family: 'Patrick Hand', cursive, sans-serif;
+                        font-weight: 700;
+                        transition: all 0.12s ease;
+                    }
+
+                    #btnToggleAutoLang:hover {
+                        background: #fff9c4;
+                    }
+
+                    /* Nút bấm hành động (Action buttons) */
+                    .btn-action {
+                        width: 100%;
+                        padding: 9px 12px;
+                        border-radius: 8px;
+                        border: 2px solid var(--border-pencil);
+                        font-family: 'Kalam', cursive, sans-serif;
+                        font-size: 14px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        transition: all 0.15s ease;
+                        box-shadow: 3px 3px 0px var(--border-pencil);
+                    }
+
+                    .btn-action:hover:not(:disabled) {
+                        transform: translate(-1.5px, -1.5px);
+                        box-shadow: 4.5px 4.5px 0px var(--border-pencil);
+                    }
+
+                    .btn-action:active:not(:disabled) {
+                        transform: translate(1.5px, 1.5px);
+                        box-shadow: 1px 1px 0px var(--border-pencil);
+                    }
+
+                    .btn-action:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                        box-shadow: 1px 1px 0px var(--border-pencil);
+                        transform: none;
+                    }
+
+                    .btn-translate {
+                        background: #ff4d4d;
+                        color: #ffffff;
+                    }
+                    .btn-translate .sketch-icon {
+                        stroke: #ffffff;
+                    }
+
+                    .btn-toggle {
+                        background: #ffffff;
+                        color: var(--border-pencil);
+                    }
+
+                    .btn-toggle.active {
+                        background: #fff9c4;
+                        border-color: var(--border-pencil);
+                    }
+
+                    /* Thanh trượt tùy chỉnh (Sliders) */
+                    .control-group {
                         display: flex;
                         flex-direction: column;
                         gap: 4px;
                     }
 
-                    .form-input-label {
-                        font-size: 11px;
-                        color: #94a3b8;
+                    .control-header {
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 13px;
                         font-weight: 600;
+                        color: #555555;
+                    }
+
+                    .range-slider {
+                        width: 100%;
+                        height: 6px;
+                        border-radius: 4px;
+                        background: #e5e0d8;
+                        border: 1.5px solid var(--border-pencil);
+                        outline: none;
+                        -webkit-appearance: none;
+                        cursor: pointer;
+                    }
+
+                    .range-slider::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        width: 16px;
+                        height: 16px;
+                        border-radius: 50%;
+                        background: #ff4d4d;
+                        border: 2px solid var(--border-pencil);
+                        cursor: pointer;
+                        box-shadow: 1px 1px 0px var(--border-pencil);
+                    }
+
+                    /* SETTINGS VIEW */
+                    .presets-pills {
+                        display: flex;
+                        gap: 5px;
+                        overflow-x: auto;
+                        padding-bottom: 2px;
+                    }
+
+                    .preset-pill {
+                        background: #ffffff;
+                        border: 1.5px solid var(--border-pencil);
+                        color: var(--border-pencil);
+                        font-family: 'Patrick Hand', cursive, sans-serif;
+                        font-size: 12px;
+                        font-weight: 600;
+                        padding: 3px 8px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        white-space: nowrap;
+                        box-shadow: 1.5px 1.5px 0px var(--border-pencil);
+                        transition: all 0.12s ease;
+                    }
+
+                    .preset-pill:hover {
+                        background: #fff9c4;
+                        transform: translateY(-1px);
+                    }
+
+                    .preset-pill.active {
+                        background: #2d5da1;
+                        color: #ffffff;
+                    }
+
+                    .form-input-group {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 3px;
+                    }
+
+                    .form-input-label {
+                        font-size: 12px;
+                        color: #444444;
+                        font-weight: 700;
                         display: flex;
                         justify-content: space-between;
                     }
 
                     .form-input-field {
                         width: 100%;
-                        background: rgba(0, 0, 0, 0.35);
-                        border: 1px solid rgba(255, 255, 255, 0.12);
-                        border-radius: 8px;
-                        padding: 7px 10px;
-                        color: #f8fafc;
+                        background: #ffffff;
+                        border: 2px solid var(--border-pencil);
+                        border-radius: 6px;
+                        padding: 6px 8px;
+                        color: var(--border-pencil);
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                         font-size: 12px;
                         outline: none;
                         box-sizing: border-box;
+                        box-shadow: 2px 2px 0px rgba(45, 45, 45, 0.12);
                     }
 
                     .form-input-field:focus {
-                        border-color: #6366f1;
-                        background: rgba(0, 0, 0, 0.55);
+                        border-color: #2d5da1;
+                        background: #fdfdfd;
                     }
 
                     .input-password-row {
@@ -458,302 +763,98 @@
 
                     .btn-eye {
                         position: absolute;
-                        right: 8px;
+                        right: 6px;
                         background: none;
                         border: none;
-                        color: #94a3b8;
+                        color: var(--border-pencil);
                         cursor: pointer;
-                        font-size: 13px;
                         padding: 2px;
-                    }
-
-                    .btn-eye:hover {
-                        color: #fff;
-                    }
-
-                    .btn-save-cfg {
-                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                        color: white;
-                        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-                    }
-
-                    .btn-save-cfg:hover:not(:disabled) {
-                        filter: brightness(1.1);
-                        transform: translateY(-1px);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                     }
 
                     .btn-test-cfg {
-                        background: rgba(99, 102, 241, 0.2);
-                        border: 1px solid rgba(99, 102, 241, 0.4);
-                        color: #c7d2fe;
+                        background: #2d5da1;
+                        color: #ffffff;
+                    }
+                    .btn-test-cfg .sketch-icon {
+                        stroke: #ffffff;
                     }
 
-                    .btn-test-cfg:hover:not(:disabled) {
-                        background: rgba(99, 102, 241, 0.35);
+                    .btn-save-cfg {
+                        background: #15803d;
+                        color: #ffffff;
+                    }
+                    .btn-save-cfg .sketch-icon {
+                        stroke: #ffffff;
                     }
 
                     .status-msg-badge {
-                        font-size: 11px;
-                        padding: 6px 10px;
+                        font-size: 12px;
+                        padding: 6px 8px;
                         border-radius: 6px;
                         display: none;
                         line-height: 1.3;
+                        font-weight: 600;
+                        border: 1.5px solid var(--border-pencil);
                     }
 
                     .status-msg-badge.success {
                         display: block;
-                        background: rgba(16, 185, 129, 0.2);
-                        border: 1px solid rgba(16, 185, 129, 0.4);
-                        color: #6ee7b7;
+                        background: #dcfce7;
+                        color: #15803d;
                     }
 
                     .status-msg-badge.error {
                         display: block;
-                        background: rgba(239, 68, 68, 0.2);
-                        border: 1px solid rgba(239, 68, 68, 0.4);
-                        color: #fca5a5;
+                        background: #fee2e2;
+                        color: #b91c1c;
                     }
 
                     .status-msg-badge.info {
                         display: block;
-                        background: rgba(99, 102, 241, 0.2);
-                        border: 1px solid rgba(99, 102, 241, 0.4);
-                        color: #c7d2fe;
-                    }
-
-                    .status-card {
-                        background: rgba(255, 255, 255, 0.04);
-                        border-radius: 10px;
-                        padding: 10px 12px;
-                        font-size: 12px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 4px;
-                        border: 1px solid rgba(255, 255, 255, 0.05);
-                    }
-
-                    .status-line {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-
-                    .status-label {
-                        color: #94a3b8;
-                    }
-
-                    .status-value {
-                        font-weight: 600;
-                        color: #e2e8f0;
-                    }
-
-                    /* Nút dịch chính */
-                    .btn-action {
-                        width: 100%;
-                        padding: 10px 14px;
-                        border-radius: 10px;
-                        border: none;
-                        font-size: 13px;
-                        font-weight: 600;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8px;
-                        transition: all 0.2s ease;
-                    }
-
-                    .btn-translate {
-                        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                        color: white;
-                        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
-                    }
-
-                    .btn-translate:hover:not(:disabled) {
-                        filter: brightness(1.1);
-                        transform: translateY(-1px);
-                        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.5);
-                    }
-
-                    .btn-translate:disabled {
-                        opacity: 0.6;
-                        cursor: not-allowed;
-                    }
-
-                    .btn-toggle {
-                        background: rgba(255, 255, 255, 0.08);
-                        color: #f1f5f9;
-                        border: 1px solid rgba(255, 255, 255, 0.1);
-                    }
-
-                    .btn-toggle:hover {
-                        background: rgba(255, 255, 255, 0.14);
-                    }
-
-                    .btn-toggle.active {
-                        border-color: #6366f1;
-                        background: rgba(99, 102, 241, 0.2);
-                        color: #a5b4fc;
-                    }
-
-                    /* Thanh trượt tùy chỉnh */
-                    .control-group {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 6px;
-                    }
-
-                    .control-header {
-                        display: flex;
-                        justify-content: space-between;
-                        font-size: 11px;
-                        color: #94a3b8;
-                    }
-
-                    .range-slider {
-                        width: 100%;
-                        height: 5px;
-                        border-radius: 3px;
-                        background: rgba(255, 255, 255, 0.15);
-                        outline: none;
-                        -webkit-appearance: none;
-                        cursor: pointer;
-                    }
-
-                    .range-slider::-webkit-slider-thumb {
-                        -webkit-appearance: none;
-                        width: 14px;
-                        height: 14px;
-                        border-radius: 50%;
-                        background: #818cf8;
-                        cursor: pointer;
-                        box-shadow: 0 0 6px rgba(129, 140, 248, 0.8);
-                    }
-
-                    .progress-bar-container {
-                        width: 100%;
-                        height: 6px;
-                        background: rgba(255, 255, 255, 0.1);
-                        border-radius: 3px;
-                        overflow: hidden;
-                        margin-top: 4px;
-                        display: none;
-                    }
-
-                    .progress-bar-fill {
-                        height: 100%;
-                        background: linear-gradient(90deg, #6366f1, #38bdf8);
-                        width: 0%;
-                        transition: width 0.3s ease;
-                    }
-
-                    /* Mode Switcher Toolbar */
-                    .mode-switcher-container {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 6px;
-                        background: rgba(0, 0, 0, 0.28);
-                        border: 1px solid rgba(255, 255, 255, 0.08);
-                        border-radius: 10px;
-                        padding: 6px;
-                    }
-
-                    .mode-tabs {
-                        display: flex;
-                        gap: 4px;
-                        background: rgba(255, 255, 255, 0.04);
-                        border-radius: 7px;
-                        padding: 2px;
-                    }
-
-                    .mode-tab {
-                        flex: 1;
-                        padding: 5px 8px;
-                        font-size: 11px;
-                        font-weight: 700;
-                        border-radius: 6px;
-                        border: none;
-                        background: transparent;
-                        color: #94a3b8;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                        text-align: center;
-                    }
-
-                    .mode-tab:hover {
-                        color: #e2e8f0;
-                    }
-
-                    .mode-tab.active {
-                        background: #6366f1;
-                        color: #ffffff;
-                        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
-                    }
-
-                    .sub-providers-row {
-                        display: flex;
-                        gap: 4px;
-                        justify-content: space-between;
-                    }
-
-                    .sub-pill {
-                        flex: 1;
-                        font-size: 10px;
-                        font-weight: 600;
-                        padding: 4px 4px;
-                        border-radius: 5px;
-                        border: 1px solid rgba(255, 255, 255, 0.1);
-                        background: rgba(255, 255, 255, 0.04);
-                        color: #cbd5e1;
-                        cursor: pointer;
-                        text-align: center;
-                        transition: all 0.15s ease;
-                        white-space: nowrap;
-                    }
-
-                    .sub-pill:hover {
-                        background: rgba(99, 102, 241, 0.18);
-                        border-color: #6366f1;
-                        color: #fff;
-                    }
-
-                    .sub-pill.active {
-                        background: rgba(99, 102, 241, 0.28);
-                        border-color: #818cf8;
-                        color: #a5b4fc;
+                        background: #e0f2fe;
+                        color: #0369a1;
                     }
 
                     .panel-footer {
-                        padding: 10px 16px;
-                        border-top: 1px solid rgba(255, 255, 255, 0.06);
+                        padding: 8px 14px;
+                        border-top: 2px dashed var(--border-pencil);
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        font-size: 11px;
-                        color: #64748b;
-                        background: rgba(0, 0, 0, 0.2);
+                        font-size: 12px;
+                        background: #ffffff;
                     }
 
                     .link-btn {
-                        color: #818cf8;
+                        color: var(--border-pencil);
                         text-decoration: none;
-                        font-weight: 500;
-                        transition: color 0.2s;
+                        font-weight: 700;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        transition: color 0.15s;
                     }
 
                     .link-btn:hover {
-                        color: #a5b4fc;
-                        text-decoration: underline;
+                        color: #ff4d4d;
                     }
 
-                    /* Spinner animation */
+                    .link-btn:hover .sketch-icon {
+                        stroke: #ff4d4d;
+                    }
+
+                    /* Spinner nét chì */
                     .spinner {
                         width: 14px;
                         height: 14px;
-                        border: 2px solid rgba(255, 255, 255, 0.3);
-                        border-top-color: white;
+                        border: 2px solid rgba(45, 45, 45, 0.25);
+                        border-top-color: currentColor;
                         border-radius: 50%;
                         animation: spin 0.8s linear infinite;
+                        display: inline-block;
                     }
 
                     @keyframes spin {
@@ -764,13 +865,15 @@
                 <div class="widget-container">
                     <!-- Popover Panel -->
                     <div class="popover-panel" id="panel">
+                        <div class="tape-strip"></div>
                         <div class="panel-header">
                             <div class="panel-title">
-                                <span id="panelTitleText">🌐 Manga AI Translator</span>
+                                <span id="panelTitleIcon">${SKETCH_ICONS.lightning}</span>
+                                <span id="panelTitleText">MangaStream AI</span>
                             </div>
                             <div class="header-actions">
-                                <button class="gear-btn" id="gearBtn" title="Cài đặt API">⚙️</button>
-                                <button class="close-btn" id="closeBtn" title="Thu nhỏ">✕</button>
+                                <button type="button" class="gear-btn" id="gearBtn" title="Cài đặt API">${SKETCH_ICONS.gear}</button>
+                                <button type="button" class="close-btn" id="closeBtn" title="Thu nhỏ">${SKETCH_ICONS.close}</button>
                             </div>
                         </div>
 
@@ -794,39 +897,46 @@
                                 <!-- MODE SWITCHER TOOLBAR -->
                                 <div class="mode-switcher-container">
                                     <div class="mode-tabs">
-                                        <button type="button" class="mode-tab active" id="tabOcrTrans" title="Bóc chữ bằng Manga-OCR/RapidOCR trước rồi dịch">⚡ OCR + Dịch</button>
-                                        <button type="button" class="mode-tab" id="tabImageTrans" title="Gửi toàn ảnh kèm đánh số Set-of-Mark">🖼️ Ảnh + Vision</button>
+                                        <button type="button" class="mode-tab active" id="tabOcrTrans" title="Bóc chữ bằng Manga-OCR/RapidOCR trước rồi dịch">
+                                            ${SKETCH_ICONS.lightning}
+                                            <span>OCR & Dịch</span>
+                                        </button>
+                                        <button type="button" class="mode-tab" id="tabImageTrans" title="Gửi toàn ảnh kèm đánh số Set-of-Mark">
+                                            ${SKETCH_ICONS.image}
+                                            <span>Ảnh & Vision</span>
+                                        </button>
                                     </div>
                                     <!-- OCR ENGINE SELECTOR (CHO OCR_TRANS) -->
                                     <div class="sub-providers-row" id="ocrEngineRow" style="margin-top: 4px;">
-                                        <button type="button" class="sub-pill active" data-ocr="manga_ocr" title="Manga-OCR: Chuyên bóc Manga tiếng Nhật">🇯🇵 Nhật (MangaOCR)</button>
-                                        <button type="button" class="sub-pill" data-ocr="rapid_ocr_en" title="RapidOCR: Chuyên Comic tiếng Anh & Latinh">🇬🇧 Anh (RapidOCR)</button>
-                                        <button type="button" class="sub-pill" data-ocr="rapid_ocr_ch" title="RapidOCR: Chuyên Manhua tiếng Trung">🇨🇳 Trung (RapidOCR)</button>
+                                        <button type="button" class="sub-pill active" data-ocr="manga_ocr" title="Manga-OCR: Chuyên bóc Manga tiếng Nhật">Nhật [JA]</button>
+                                        <button type="button" class="sub-pill" data-ocr="rapid_ocr_en" title="RapidOCR: Chuyên Comic tiếng Anh & Latinh">Anh [EN]</button>
+                                        <button type="button" class="sub-pill" data-ocr="rapid_ocr_ch" title="RapidOCR: Chuyên Manhua tiếng Trung">Trung [ZH]</button>
                                     </div>
                                     <!-- AUTO DETECT STATUS & MANUAL OVERRIDE BAR -->
-                                    <div id="ocrAutoDetectBar" style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                                        <span id="ocrAutoDetectText" style="color: #a1a1aa;">🤖 Auto: BẬT</span>
-                                        <button type="button" id="btnToggleAutoLang" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #e4e4e7; border-radius: 4px; font-size: 10px; cursor: pointer; padding: 1px 6px;">Tắt</button>
+                                    <div id="ocrAutoDetectBar" style="margin-top: 2px;">
+                                        <span id="ocrAutoDetectText" style="color: #444444; font-weight: 600;">Auto: BẬT</span>
+                                        <button type="button" id="btnToggleAutoLang">Tắt</button>
                                     </div>
                                     <div class="sub-providers-row" id="subProvidersRow" style="margin-top: 4px;">
-                                        <button type="button" class="sub-pill active" data-prov="google" title="Google Translate (Miễn phí)">🌐 Google</button>
-                                        <button type="button" class="sub-pill" data-prov="llm_text" title="Gửi text thuần lên LLM">🤖 LLM Text</button>
-                                        <button type="button" class="sub-pill" data-prov="raw" title="Giữ nguyên chữ gốc">📝 Raw Gốc</button>
+                                        <button type="button" class="sub-pill active" data-prov="google" title="Google Translate (Miễn phí)">Google</button>
+                                        <button type="button" class="sub-pill" data-prov="llm_text" title="Gửi text thuần lên LLM">LLM Text</button>
+                                        <button type="button" class="sub-pill" data-prov="raw" title="Giữ nguyên chữ gốc">Raw Gốc</button>
                                     </div>
                                 </div>
 
-                                <button class="btn-action btn-translate" id="btnTranslate">
-                                    <span id="btnTranslateIcon">🚀</span>
+                                <button type="button" class="btn-action btn-translate" id="btnTranslate">
+                                    <span id="btnTranslateIcon">${SKETCH_ICONS.translate}</span>
                                     <span id="btnTranslateText">Dịch Chapter Này</span>
                                 </button>
 
-                                <button class="btn-action btn-toggle active" id="btnToggleOverlay">
-                                    <span>👁️ Hiển thị bản dịch (Phím T)</span>
+                                <button type="button" class="btn-action btn-toggle active" id="btnToggleOverlay">
+                                    <span id="btnToggleIcon">${SKETCH_ICONS.eye}</span>
+                                    <span id="btnToggleText">Hiển thị bản dịch (Phím T)</span>
                                 </button>
 
                                 <div class="control-group">
                                     <div class="control-header">
-                                        <span>Độ mờ nền bong bóng</span>
+                                        <span>Độ mờ bong bóng</span>
                                         <span id="opacityValue">88%</span>
                                     </div>
                                     <input type="range" class="range-slider" id="opacitySlider" min="0" max="100" value="88">
@@ -845,10 +955,10 @@
                             <div class="view-container hidden" id="settingsView">
                                 <div class="form-input-group">
                                     <div class="form-input-label">
-                                        <span>⚡ Hồ sơ & Model AI (Profiles):</span>
+                                        <span>Hồ sơ & Model AI (Profiles):</span>
                                     </div>
                                     <div class="presets-pills" id="presetsPills">
-                                        <!-- Được render tự động từ config.profiles -->
+                                        <!-- Render động từ config.profiles -->
                                     </div>
                                 </div>
 
@@ -879,39 +989,44 @@
                                     </div>
                                     <div class="input-password-row">
                                         <input type="password" class="form-input-field" id="cfgApiKey" placeholder="sk-...">
-                                        <button type="button" class="btn-eye" id="btnEyeKey" title="Hiện/ẩn key">👁️</button>
+                                        <button type="button" class="btn-eye" id="btnEyeKey" title="Hiện/ẩn key">${SKETCH_ICONS.eye}</button>
                                     </div>
                                 </div>
 
                                 <div class="status-msg-badge" id="cfgBadge"></div>
 
-                                <button class="btn-action btn-test-cfg" id="btnTestCfg">
-                                    <span id="testCfgIcon">🧪</span>
+                                <button type="button" class="btn-action btn-test-cfg" id="btnTestCfg">
+                                    <span id="testCfgIcon">${SKETCH_ICONS.flask}</span>
                                     <span id="testCfgText">Kiểm Tra API</span>
                                 </button>
 
-                                <button class="btn-action btn-save-cfg" id="btnSaveCfg">
-                                    <span id="saveCfgIcon">💾</span>
+                                <button type="button" class="btn-action btn-save-cfg" id="btnSaveCfg">
+                                    <span id="saveCfgIcon">${SKETCH_ICONS.save}</span>
                                     <span id="saveCfgText">Lưu & Đồng Bộ</span>
                                 </button>
 
-                                <button class="btn-action btn-toggle" id="btnBackToMain">
-                                    <span>← Quay Lại Bảng Điều Khiển</span>
+                                <button type="button" class="btn-action btn-toggle" id="btnBackToMain">
+                                    <span>${SKETCH_ICONS.arrowLeft}</span>
+                                    <span>Quay Lại Bảng Điều Khiển</span>
                                 </button>
                             </div>
                         </div>
 
                         <div class="panel-footer">
-                            <a href="http://127.0.0.1:8765/" target="_blank" class="link-btn" id="linkWebReader">📖 Web Reader</a>
-                            <a href="http://127.0.0.1:8765/settings" target="_blank" class="link-btn" id="linkWebSettings">⚙️ Server Web</a>
+                            <a href="http://127.0.0.1:8765/" target="_blank" class="link-btn" id="linkWebReader">
+                                ${SKETCH_ICONS.book}
+                                <span>Web Reader</span>
+                            </a>
+                            <a href="http://127.0.0.1:8765/settings" target="_blank" class="link-btn" id="linkWebSettings">
+                                ${SKETCH_ICONS.gear}
+                                <span>Server Web</span>
+                            </a>
                         </div>
                     </div>
 
                     <!-- Floating Action Button -->
-                    <div class="fab-button" id="fabButton" title="Manga AI Translation Menu">
-                        <svg class="fab-icon" viewBox="0 0 24 24">
-                            <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
-                        </svg>
+                    <div class="fab-button" id="fabButton" title="MangaStream AI Menu">
+                        ${SKETCH_ICONS.lightning}
                         <div class="status-dot disconnected" id="statusDot"></div>
                     </div>
                 </div>
@@ -977,16 +1092,16 @@
 
                 if (ocrAutoDetectText && btnToggleAutoLang) {
                     if (State.isManualOverride) {
-                        ocrAutoDetectText.innerHTML = `<span style="color:#fbbf24; font-weight:600;">🔒 Thủ công (Khóa nhãn)</span>`;
+                        ocrAutoDetectText.innerHTML = `<span style="color:#b45309; font-weight:700;">Khóa thủ công</span>`;
                         btnToggleAutoLang.textContent = '↺ Auto';
                         btnToggleAutoLang.title = 'Khôi phục tự động nhận diện theo MangaDex';
                     } else if (State.autoDetectLang) {
                         const langBadge = State.detectedLang ? `[${State.detectedLang.toUpperCase()}]` : '';
-                        ocrAutoDetectText.innerHTML = `🤖 Auto: <span style="color:#34d399; font-weight:600;">BẬT ${langBadge}</span>`;
+                        ocrAutoDetectText.innerHTML = `Auto: <span style="color:#15803d; font-weight:700;">BẬT ${langBadge}</span>`;
                         btnToggleAutoLang.textContent = 'Tắt';
                         btnToggleAutoLang.title = 'Tắt tự động nhận diện ngôn ngữ';
                     } else {
-                        ocrAutoDetectText.innerHTML = `🤖 Auto: <span style="color:#9ca3af;">TẮT</span>`;
+                        ocrAutoDetectText.innerHTML = `Auto: <span style="color:#71717a; font-weight:700;">TẮT</span>`;
                         btnToggleAutoLang.textContent = 'Bật';
                         btnToggleAutoLang.title = 'Bật tự động nhận diện ngôn ngữ';
                     }
@@ -1087,6 +1202,7 @@
             const btnBackToMain = root.getElementById('btnBackToMain');
             const mainView = root.getElementById('mainView');
             const settingsView = root.getElementById('settingsView');
+            const panelTitleIcon = root.getElementById('panelTitleIcon');
             const panelTitleText = root.getElementById('panelTitleText');
             const cfgServerUrl = root.getElementById('cfgServerUrl');
             const cfgBaseUrl = root.getElementById('cfgBaseUrl');
@@ -1100,20 +1216,23 @@
             const saveCfgIcon = root.getElementById('saveCfgIcon');
             const saveCfgText = root.getElementById('saveCfgText');
             const cfgBadge = root.getElementById('cfgBadge');
+
             const showView = (viewName) => {
                 if (viewName === 'settings') {
                     State.isSettingsView = true;
                     mainView.classList.add('hidden');
                     settingsView.classList.remove('hidden');
                     gearBtn.classList.add('active');
-                    panelTitleText.textContent = '⚙️ Cài Đặt API';
+                    setSafeHTML(panelTitleIcon, SKETCH_ICONS.gear);
+                    panelTitleText.textContent = 'Cài Đặt API';
                     this.loadSettingsForm();
                 } else {
                     State.isSettingsView = false;
                     settingsView.classList.add('hidden');
                     mainView.classList.remove('hidden');
                     gearBtn.classList.remove('active');
-                    panelTitleText.textContent = '🌐 Manga AI Translator';
+                    setSafeHTML(panelTitleIcon, SKETCH_ICONS.lightning);
+                    panelTitleText.textContent = 'MangaStream AI';
                 }
             };
 
@@ -1132,7 +1251,7 @@
                 e.stopPropagation();
                 const isPass = cfgApiKey.type === 'password';
                 cfgApiKey.type = isPass ? 'text' : 'password';
-                btnEyeKey.textContent = isPass ? '🔒' : '👁️';
+                setSafeHTML(btnEyeKey, isPass ? SKETCH_ICONS.eyeOff : SKETCH_ICONS.eye);
             });
 
             // Nút Kiểm Tra API
@@ -1148,10 +1267,7 @@
                 }
 
                 btnTestCfg.disabled = true;
-                testCfgIcon.replaceChildren();
-                const spinner = document.createElement('div');
-                spinner.className = 'spinner';
-                testCfgIcon.appendChild(spinner);
+                setSafeHTML(testCfgIcon, '<div class="spinner"></div>');
                 testCfgText.textContent = 'Đang test...';
                 this.hideSettingsBadge();
 
@@ -1165,15 +1281,15 @@
                     const latency = Math.round(performance.now() - t0);
 
                     if (testRes.ok) {
-                        this.showSettingsBadge('success', `✅ Kết nối thành công (${latency}ms)! Model phản hồi: "${testRes.reply || 'OK'}"`);
+                        this.showSettingsBadge('success', `Kết nối thành công (${latency}ms)! Model phản hồi: "${testRes.reply || 'OK'}"`);
                     } else {
-                        this.showSettingsBadge('error', `❌ Kiểm tra thất bại: ${testRes.message || 'Lỗi API'}`);
+                        this.showSettingsBadge('error', `Kiểm tra thất bại: ${testRes.message || 'Lỗi API'}`);
                     }
                 } catch (err) {
-                    this.showSettingsBadge('error', `❌ Lỗi kết nối máy chủ local: ${err.message}`);
+                    this.showSettingsBadge('error', `Lỗi kết nối máy chủ local: ${err.message}`);
                 } finally {
                     btnTestCfg.disabled = false;
-                    testCfgIcon.textContent = '🧪';
+                    setSafeHTML(testCfgIcon, SKETCH_ICONS.flask);
                     testCfgText.textContent = 'Kiểm Tra API';
                 }
             });
@@ -1193,10 +1309,7 @@
                 root.getElementById('linkWebSettings').href = `${serverUrl}/settings`;
 
                 btnSaveCfg.disabled = true;
-                saveCfgIcon.replaceChildren();
-                const spinner = document.createElement('div');
-                spinner.className = 'spinner';
-                saveCfgIcon.appendChild(spinner);
+                setSafeHTML(saveCfgIcon, '<div class="spinner"></div>');
                 saveCfgText.textContent = 'Đang lưu...';
                 this.hideSettingsBadge();
 
@@ -1209,20 +1322,20 @@
                     });
 
                     if (saveRes.ok) {
-                        this.showSettingsBadge('success', '✅ Đã lưu cấu hình và đồng bộ với Server thành công!');
+                        this.showSettingsBadge('success', 'Đã lưu cấu hình và đồng bộ với Server thành công!');
                         this.loadSettingsForm();
                         setTimeout(() => {
                             showView('main');
                             this.hideSettingsBadge();
                         }, 1200);
                     } else {
-                        this.showSettingsBadge('error', `❌ Lỗi lưu cấu hình: ${saveRes.message || 'Lỗi server'}`);
+                        this.showSettingsBadge('error', `Lỗi lưu cấu hình: ${saveRes.message || 'Lỗi server'}`);
                     }
                 } catch (err) {
-                    this.showSettingsBadge('info', 'ℹ️ Đã lưu URL server vào Extension. (Không gửi được lên Server backend)');
+                    this.showSettingsBadge('info', 'Đã lưu URL server vào Extension. (Không gửi được lên Server backend)');
                 } finally {
                     btnSaveCfg.disabled = false;
-                    saveCfgIcon.textContent = '💾';
+                    setSafeHTML(saveCfgIcon, SKETCH_ICONS.save);
                     saveCfgText.textContent = 'Lưu & Đồng Bộ';
                 }
             });
@@ -1257,8 +1370,8 @@
                             pill.type = 'button';
                             pill.className = `preset-pill ${pid === activeId ? 'active' : ''}`;
                             pill.setAttribute('data-profile-id', pid);
-                            const hasKeyIcon = (prof.has_key || Boolean(prof.api_key && prof.api_key.trim())) ? '🔑' : '⚠️';
-                            pill.textContent = `${prof.name || pid} ${hasKeyIcon}`;
+                            const hasKeyLabel = (prof.has_key || Boolean(prof.api_key && prof.api_key.trim())) ? '[Key]' : '[Chưa có Key]';
+                            pill.textContent = `${prof.name || pid} ${hasKeyLabel}`;
                             pill.title = `${prof.model || ''} (${prof.base_url || ''})`;
 
                             pill.addEventListener('click', async (e) => {
@@ -1279,7 +1392,7 @@
                                             cfgModel.value = newProf.model || '';
                                             cfgApiKey.value = newProf.api_key || '';
                                         }
-                                        this.showSettingsBadge('success', `✅ Đã chuyển sang: ${prof.name}`);
+                                        this.showSettingsBadge('success', `Đã chuyển sang: ${prof.name}`);
                                     }
                                 } catch (err) {
                                     console.warn('[MangaOverlay] Lỗi chuyển profile:', err);
@@ -1360,10 +1473,7 @@
             if (info.isTranslating) {
                 this.updateStatus('translating', 'Đang dịch...');
                 btnTranslate.disabled = true;
-                btnIcon.replaceChildren();
-                const spinner = document.createElement('div');
-                spinner.className = 'spinner';
-                btnIcon.appendChild(spinner);
+                setSafeHTML(btnIcon, '<div class="spinner"></div>');
                 btnText.textContent = `Đang dịch (${info.completedPages || 0}/${info.totalPages || '?'})`;
 
                 progressContainer.style.display = 'block';
@@ -1373,15 +1483,15 @@
             } else if (info.hasTranslation) {
                 this.updateStatus('ready', 'Đã có bản dịch');
                 btnTranslate.disabled = false;
-                btnIcon.textContent = '🔄';
+                setSafeHTML(btnIcon, SKETCH_ICONS.refresh);
                 btnText.textContent = 'Dịch lại Chapter';
 
                 progressContainer.style.display = 'none';
-                progressText.textContent = `✅ Đã có (${info.pageCount} trang)`;
+                progressText.textContent = `Đã có (${info.pageCount} trang)`;
             } else {
                 this.updateStatus('connected', 'Chưa có bản dịch');
                 btnTranslate.disabled = false;
-                btnIcon.textContent = '🚀';
+                setSafeHTML(btnIcon, SKETCH_ICONS.translate);
                 btnText.textContent = 'Dịch Chapter Này';
 
                 progressContainer.style.display = 'none';
@@ -1393,12 +1503,16 @@
             const root = this.shadowRoot;
             if (!root) return;
             const btn = root.getElementById('btnToggleOverlay');
+            const icon = root.getElementById('btnToggleIcon');
+            const text = root.getElementById('btnToggleText');
             if (isVisible) {
                 btn.classList.add('active');
-                btn.textContent = '👁️ Hiển thị bản dịch (Phím T)';
+                if (icon) setSafeHTML(icon, SKETCH_ICONS.eye);
+                if (text) text.textContent = 'Hiển thị bản dịch (Phím T)';
             } else {
                 btn.classList.remove('active');
-                btn.textContent = '🚫 Đã ẩn bản dịch (Phím T)';
+                if (icon) setSafeHTML(icon, SKETCH_ICONS.eyeOff);
+                if (text) text.textContent = 'Đã ẩn bản dịch (Phím T)';
             }
         }
     }
@@ -1647,7 +1761,7 @@
             if (existing && existing.isConnected) {
                 if (existing.getAttribute('data-page') === String(pageData.page)) {
                     if (typeof img.__updateOverlayPos === 'function') {
-                        img.__updateOverlayPos();
+                        img.__updateOverlayPos(true);
                     }
                     return;
                 }
@@ -1663,7 +1777,7 @@
             });
 
             // 2. Nếu ảnh chưa tải xong (đang chờ fetch):
-            if (!img.complete) {
+            if (!img.complete || img.naturalWidth === 0) {
                 const targetPage = pageData.page;
                 const onImgLoaded = () => {
                     img.removeEventListener('load', onImgLoaded);
@@ -1704,8 +1818,9 @@
 
             let lastRenderedW = 0;
             let lastRenderedH = 0;
+            let lastFontScale = State.fontScale;
 
-            const updatePositions = () => {
+            const updatePositions = (forceRedraw = false) => {
                 if (!img.isConnected || !container.isConnected) return;
                 // Kiểm tra nếu container này đã lạc hậu so với trang hiện tại của ảnh
                 if (img.__targetPage && img.__targetPage !== pageData.page) {
@@ -1718,7 +1833,7 @@
                 const currentH = imgRect.height;
 
                 if (currentW < 10 || currentH < 10) {
-                    requestAnimationFrame(updatePositions);
+                    requestAnimationFrame(() => updatePositions(forceRedraw));
                     return;
                 }
 
@@ -1727,94 +1842,140 @@
                     parent.style.setProperty('position', 'relative', 'important');
                 }
 
-                // VÒNG LẶP PHẢN HỒI KÍN (CLOSED-LOOP DELTA FEEDBACK CORRECTION):
-                // Đo đạc tọa độ viewport thực tế giữa container và manga image.
-                // Bất kể layout dùng flexbox justify-center, margin auto, padding hay lazy loading,
-                // hiệu số (deltaX, deltaY) sẽ bù trừ chuẩn xác 100% tọa độ hiển thị!
-                const cRect = container.getBoundingClientRect();
-                const deltaX = imgRect.left - cRect.left;
-                const deltaY = imgRect.top - cRect.top;
+                // 1. TÍNH TOÁN KHUNG HÌNH VẼ THỰC TẾ (BÙ TRỪ OBJECT-FIT: CONTAIN / SCALE-DOWN CỦA MANGADEX)
+                // MangaDex thường dùng object-fit: contain hoặc max-height: 100vh làm phát sinh dải đen/khoảng trống (letterbox/pillarbox)
+                const compStyle = window.getComputedStyle(img);
+                const objFit = compStyle.objectFit;
+                const natW = img.naturalWidth || 1;
+                const natH = img.naturalHeight || 1;
 
-                if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
-                    const curLeft = parseFloat(container.style.left) || 0;
-                    const curTop = parseFloat(container.style.top) || 0;
-                    container.style.left = `${curLeft + deltaX}px`;
-                    container.style.top = `${curTop + deltaY}px`;
+                let renderW = currentW;
+                let renderH = currentH;
+                let offsetX = 0;
+                let offsetY = 0;
+
+                if (objFit === 'contain' || objFit === 'scale-down') {
+                    const imgRatio = natW / natH;
+                    const elemRatio = currentW / currentH;
+                    if (elemRatio > imgRatio) {
+                        // Pillarbox: Thừa khoảng trống 2 bên trái/phải -> ảnh bị co hẹp vào giữa
+                        renderH = currentH;
+                        renderW = currentH * imgRatio;
+                        offsetX = (currentW - renderW) / 2;
+                    } else {
+                        // Letterbox: Thừa khoảng trống trên/dưới -> ảnh bị co hẹp theo chiều dọc
+                        renderW = currentW;
+                        renderH = currentW / imgRatio;
+                        offsetY = (currentH - renderH) / 2;
+                    }
                 }
 
-                container.style.width = `${currentW}px`;
-                container.style.height = `${currentH}px`;
+                // 2. ĐỊNH VỊ CHÍNH XÁC TUYỆT ĐỐI (DETERMINISTIC ZERO-DRIFT POSITIONING)
+                // Tính toán trực tiếp theo tọa độ viewport của img và parent, loại bỏ 100% hiện tượng trôi dạt do cộng dồn delta
+                const pRect = parent.getBoundingClientRect();
+                const exactLeft = (imgRect.left - pRect.left - (parent.clientLeft || 0) + parent.scrollLeft) + offsetX;
+                const exactTop = (imgRect.top - pRect.top - (parent.clientTop || 0) + parent.scrollTop) + offsetY;
 
-                // Nếu kích thước bubble không đổi và đã render bubble rồi thì không cần re-create
-                if (Math.abs(currentW - lastRenderedW) < 2 && Math.abs(currentH - lastRenderedH) < 2 && container.children.length > 0) {
+                container.style.left = `${exactLeft}px`;
+                container.style.top = `${exactTop}px`;
+                container.style.width = `${renderW}px`;
+                container.style.height = `${renderH}px`;
+
+                // Nếu kích thước và tỷ lệ font không thay đổi đáng kể và đã có bubbles, không cần dựng lại DOM
+                if (!forceRedraw &&
+                    Math.abs(renderW - lastRenderedW) < 2 &&
+                    Math.abs(renderH - lastRenderedH) < 2 &&
+                    Math.abs(State.fontScale - lastFontScale) < 0.01 &&
+                    container.children.length > 0) {
                     return;
                 }
 
-                lastRenderedW = currentW;
-                lastRenderedH = currentH;
+                lastRenderedW = renderW;
+                lastRenderedH = renderH;
+                lastFontScale = State.fontScale;
 
                 container.replaceChildren();
 
-                const origW = pageData.resolution ? parseInt(pageData.resolution.split('x')[0], 10) : (img.naturalWidth || 1000);
-                const origH = pageData.resolution ? parseInt(pageData.resolution.split('x')[1], 10) : (img.naturalHeight || 1400);
+                // 3. TỈ LỆ CO GIÃN THEO TRANH VẼ GỐC
+                const origW = pageData.resolution ? parseInt(pageData.resolution.split('x')[0], 10) : natW;
+                const origH = pageData.resolution ? parseInt(pageData.resolution.split('x')[1], 10) : natH;
 
-                const scaleX = currentW / origW;
-                const scaleY = currentH / origH;
+                const scaleX = renderW / origW;
+                const scaleY = renderH / origH;
 
                 pageData.bubbles.forEach((b) => {
                     if (!b.vi || b.vi.trim() === '') return;
 
                     const [bx, by, bw, bh] = b.box;
+                    let bLeft = bx * scaleX;
+                    let bTop = by * scaleY;
+                    let bWidth = bw * scaleX;
+                    let bHeight = bh * scaleY;
+
+                    // Giới hạn bong bóng tuyệt đối nằm trong khung tranh
+                    if (bLeft < 0) { bWidth += bLeft; bLeft = 0; }
+                    if (bTop < 0) { bHeight += bTop; bTop = 0; }
+                    if (bLeft + bWidth > renderW) { bWidth = Math.max(12, renderW - bLeft); }
+                    if (bTop + bHeight > renderH) { bHeight = Math.max(12, renderH - bTop); }
+
                     const bubble = document.createElement('div');
                     bubble.className = 'md-speech-bubble';
 
-                    const bWidth = bw * scaleX;
-                    const bHeight = bh * scaleY;
-
                     Object.assign(bubble.style, {
                         position: 'absolute',
-                        left: `${bx * scaleX}px`,
-                        top: `${by * scaleY}px`,
+                        left: `${bLeft}px`,
+                        top: `${bTop}px`,
                         width: `${bWidth}px`,
                         height: `${bHeight}px`,
-                        backgroundColor: `rgba(255, 255, 255, ${State.bubbleOpacity})`,
-                        color: '#09090b',
+                        backgroundColor: `rgba(253, 251, 247, ${State.bubbleOpacity})`,
+                        color: '#2d2d2d',
                         borderRadius: '6px',
-                        border: '1px solid rgba(0, 0, 0, 0.15)',
+                        border: '1.5px solid #2d2d2d',
                         padding: '2px 4px',
                         boxSizing: 'border-box',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         textAlign: 'center',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        fontFamily: "'Patrick Hand', 'Comic Neue', 'Kalam', cursive, sans-serif",
                         fontWeight: '600',
-                        lineHeight: '1.2',
+                        lineHeight: '1.15',
                         wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        overflow: 'hidden',
                         pointerEvents: State.isOverlayVisible ? 'auto' : 'none',
                         opacity: State.isOverlayVisible ? '1' : '0',
                         transition: 'opacity 0.2s ease, background-color 0.2s ease',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
+                        boxShadow: '2px 2px 0px rgba(45, 45, 45, 0.25)',
                         cursor: 'help',
                     });
 
-                    const area = bWidth * bHeight;
-                    const textLen = b.vi.length;
-                    const baseFont = Math.max(9, Math.min(22, Math.sqrt(area / (textLen * 1.5)) * State.fontScale));
-                    bubble.style.fontSize = `${baseFont.toFixed(1)}px`;
+                    // 4. TỰ ĐỘNG CĂN CHỈNH VÀ THU NHỎ FONT (DYNAMIC AUTO-FIT) ĐỂ TRÁNH TRÀN CHỮ RA NGOÀI BÓNG THOẠI
+                    const usableArea = Math.max(10, bWidth - 4) * Math.max(10, bHeight - 4);
+                    const textLen = Math.max(1, b.vi.length);
+                    let fontSize = Math.max(8, Math.min(22, Math.sqrt(usableArea / (textLen * 1.5)) * State.fontScale));
+                    bubble.style.fontSize = `${fontSize.toFixed(1)}px`;
                     bubble.textContent = b.vi;
-                    bubble.title = `[ID #${b.id}] Click để sao chép bản dịch`;
+                    bubble.title = `[Bản dịch #${b.id}]\n${b.vi}\n\n[Gốc]: ${b.raw || '(không có)'}\n(Click để sao chép bản dịch)`;
+
+                    container.appendChild(bubble);
+
+                    // Tự động thu nhỏ font nếu văn bản bị tràn box
+                    let shrinkTries = 0;
+                    while ((bubble.scrollHeight > bubble.clientHeight || bubble.scrollWidth > bubble.clientWidth) && fontSize > 7 && shrinkTries < 5) {
+                        fontSize = Math.max(7, fontSize * 0.88);
+                        bubble.style.fontSize = `${fontSize.toFixed(1)}px`;
+                        shrinkTries++;
+                    }
 
                     bubble.addEventListener('click', (e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(b.vi);
-                        bubble.style.backgroundColor = 'rgba(187, 247, 208, 0.95)';
+                        bubble.style.backgroundColor = 'rgba(220, 252, 231, 0.95)';
                         setTimeout(() => {
-                            bubble.style.backgroundColor = `rgba(255, 255, 255, ${State.bubbleOpacity})`;
+                            bubble.style.backgroundColor = `rgba(253, 251, 247, ${State.bubbleOpacity})`;
                         }, 400);
                     });
-
-                    container.appendChild(bubble);
                 });
             };
 
@@ -1847,7 +2008,7 @@
 
         updateStyles() {
             document.querySelectorAll('.md-speech-bubble').forEach((el) => {
-                el.style.backgroundColor = `rgba(255, 255, 255, ${State.bubbleOpacity})`;
+                el.style.backgroundColor = `rgba(253, 251, 247, ${State.bubbleOpacity})`;
             });
         }
     }
@@ -2173,17 +2334,19 @@
         },
 
         recomputeBubbleFonts() {
-            if (State.chapterData) {
-                Engine.applyTranslation(State.chapterData);
-            }
+            document.querySelectorAll('img').forEach((img) => {
+                if (typeof img.__updateOverlayPos === 'function') {
+                    img.__updateOverlayPos(true);
+                }
+            });
         },
     };
 
     if (typeof GM_registerMenuCommand !== 'undefined') {
-        GM_registerMenuCommand('🚀 Dịch Chapter Hiện Tại', () => App.triggerManualTranslation());
-        GM_registerMenuCommand('👁️ Bật/Tắt Lớp Phủ (Phím T)', () => App.toggleOverlay());
-        GM_registerMenuCommand('📖 Mở Local Web Reader', () => window.open(`${CONFIG.SERVER_URL}/`, '_blank'));
-        GM_registerMenuCommand('⚙️ Cài Đặt API & Máy Chủ', () => window.open(`${CONFIG.SERVER_URL}/settings`, '_blank'));
+        GM_registerMenuCommand('Dịch Chapter Hiện Tại', () => App.triggerManualTranslation());
+        GM_registerMenuCommand('Bật/Tắt Lớp Phủ (Phím T)', () => App.toggleOverlay());
+        GM_registerMenuCommand('Mở Local Web Reader', () => window.open(`${CONFIG.SERVER_URL}/`, '_blank'));
+        GM_registerMenuCommand('Cài Đặt API & Máy Chủ', () => window.open(`${CONFIG.SERVER_URL}/settings`, '_blank'));
     }
 
     App.init();
