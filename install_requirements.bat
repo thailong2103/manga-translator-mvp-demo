@@ -28,9 +28,12 @@ echo [2/4] Dang nang cap pip...
 
 echo.
 echo [3/4] Dang cai dat cac thu vien tu requirements.txt...
-echo       (Bao gom ONNX DirectML, Manga-OCR Torchless, OpenCV, Transformers...)
+echo       (Bao gom ONNX DirectML, Manga-OCR, RapidOCR Torchless, OpenCV, Transformers...)
 .\.venv\Scripts\pip.exe install -r requirements.txt
 if errorlevel 1 goto PIP_ERROR
+:: Dam bao onnxruntime-directml duoc uu tien, tranh bi onnxruntime CPU ghi de
+.\.venv\Scripts\pip.exe uninstall -y onnxruntime >nul 2>nul
+.\.venv\Scripts\pip.exe install --no-deps "onnxruntime-directml>=1.20.0" -q
 echo       [OK] Cai dat thu vien thanh cong!
 
 echo.

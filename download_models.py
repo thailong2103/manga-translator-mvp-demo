@@ -110,11 +110,38 @@ def download_manga_ocr(check_only=False):
         _ = mocr(dummy_img)
 
         dt = time.perf_counter() - t0
-        print(f"✓ [2/2] Manga-OCR đã sẵn sàng và kiểm thử thành công ({dt:.1f}s)!\n")
+        print(f"✓ [2/3] Manga-OCR đã sẵn sàng và kiểm thử thành công ({dt:.1f}s)!\n")
         return True
     except Exception as e:
         print(f"❌ Lỗi khi tải / khởi tạo Manga-OCR: {e}")
         return False
+
+def download_rapid_ocr(check_only=False):
+    """Kiểm tra và chuẩn bị mô hình RapidOCR ONNX (Tiếng Anh & Tiếng Trung)."""
+    try:
+        from rapidocr_onnxruntime import RapidOCR
+        import numpy as np
+
+        if check_only:
+            print("✓ [3/3] RapidOCR ONNX đã sẵn sàng.")
+            return True
+
+        print("📥 [3/3] Đang kiểm tra và khởi tạo RapidOCR ONNX (Tiếng Anh & Tiếng Trung)...")
+        print("       (Mô hình nhẹ ~15 MB, khởi chạy kiểm thử tức thì...)")
+        t0 = time.perf_counter()
+        engine = RapidOCR()
+        dummy_img = np.ones((50, 150, 3), dtype=np.uint8) * 255
+        _ = engine(dummy_img)
+        dt = time.perf_counter() - t0
+        print(f"✓ [3/3] RapidOCR ONNX đã sẵn sàng và kiểm thử thành công ({dt:.1f}s)!\n")
+        return True
+    except ImportError:
+        print("⚠️ [3/3] Thư viện rapidocr-onnxruntime chưa được cài đặt.")
+        print("       👉 Cài đặt bằng: pip install -r requirements.txt")
+        return True
+    except Exception as e:
+        print(f"⚠️ Cảnh báo khi khởi tạo RapidOCR: {e}")
+        return True
 
 def main():
     print("=" * 80)
@@ -128,9 +155,10 @@ def main():
 
     ok1 = download_comic_text_detector(check_only=check_only)
     ok2 = download_manga_ocr(check_only=check_only)
+    ok3 = download_rapid_ocr(check_only=check_only)
 
     print("-" * 80)
-    if ok1 and ok2:
+    if ok1 and ok2 and ok3:
         print("🎉 TẤT CẢ MÔ HÌNH AI ĐÃ SẴN SÀNG ĐỂ SỬ DỤNG!")
         print("👉 Bây giờ bạn có thể chạy: start_server.bat để khởi động ứng dụng.")
         print("=" * 80)

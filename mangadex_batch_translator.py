@@ -479,6 +479,93 @@ def extract_bubbles_manga_ocr(orig_img, bubbles):
             b["raw"] = ""
     return bubbles
 
+_rapid_ocr_instances = {}
+_rapid_ocr_lock = threading.Lock()
+
+def get_rapid_ocr(lang="en"):
+    """Khởi tạo RapidOCR theo ngôn ngữ (Lazy Singleton).
+    lang = 'en': Ưu tiên tách dòng, giữ nguyên space, chuẩn font comic.
+    lang = 'ch': Chữ Hán giản thể/phồn thể, gom liền chuỗi.
+    """
+    global _rapid_ocr_instances
+    with _rapid_ocr_lock:
+        if lang not in _rapid_ocr_instances:
+            print(f"⚡ Đang nạp RapidOCR ONNX (ngôn ngữ: {lang})...")
+            try:
+                from rapidocr_onnxruntime import RapidOCR
+                _rapid_ocr_instances[lang] = RapidOCR()
+                print(f"✓ RapidOCR ({lang}) đã sẵn sàng!\n")
+            except Exception as e:
+                print(f"❌ Không thể nạp RapidOCR: {e}")
+                raise e
+        return _rapid_ocr_instances[lang]
+
+def extract_bubbles_rapid_ocr(orig_img, bubbles, lang="en"):
+    """Cắt từng khung thoại và dùng RapidOCR bóc tách chữ Tiếng Anh hoặc Tiếng Trung."""
+    if not bubbles:
+        return bubbles
+    try:
+        engine = get_rapid_ocr(lang=lang)
+    except Exception as e:
+        print(f"⚠️ Không thể khởi tạo RapidOCR ({lang}), bỏ qua bóc chữ: {e}")
+        for b in bubbles:
+            b["raw"] = ""
+        return bubbles
+
+    h, w = orig_img.shape[:2]
+    for b in bubbles:
+        bx, by, bw, bh = b["box"]
+        pad_x = int(bw * 0.05)
+        pad_y = int(bh * 0.05)
+        x1 = max(0, bx - pad_x)
+        y1 = max(0, by - pad_y)
+        x2 = min(w, bx + bw + pad_x)
+        y2 = min(h, by + bh + pad_y)
+        crop = orig_img[y1:y2, x1:x2]
+        if crop.size == 0:
+            b["raw"] = ""
+            continue
+        try:
+            with _rapid_ocr_lock:
+                result, _ = engine(crop)
+            if not result:
+                b["raw"] = ""
+                continue
+
+            # Sắp xếp các dòng thoại theo tọa độ y từ trên xuống dưới
+            def _get_top_y(item):
+                try:
+                    return min(pt[1] for pt in item[0])
+                except Exception:
+                    return 0
+
+            sorted_lines = sorted(result, key=_get_top_y)
+            texts = [item[1].strip() for item in sorted_lines if item[1].strip()]
+
+            if lang == "en":
+                # Nối bằng dấu cách, bảo toàn khoảng trắng và dấu câu
+                raw_text = " ".join(texts)
+                raw_text = re.sub(r'\s+', ' ', raw_text).strip()
+            else:  # "ch"
+                # Nối liền chuỗi cho tiếng Trung
+                raw_text = "".join(texts).strip()
+
+            b["raw"] = raw_text
+        except Exception as e:
+            print(f"⚠️ Lỗi RapidOCR bubble {b.get('id')}: {e}")
+            b["raw"] = ""
+    return bubbles
+
+def extract_bubbles_ocr(orig_img, bubbles, ocr_engine="manga_ocr"):
+    """Điều phối bóc tách chữ theo Engine OCR được chọn."""
+    if ocr_engine == "rapid_ocr_en":
+        return extract_bubbles_rapid_ocr(orig_img, bubbles, lang="en")
+    elif ocr_engine == "rapid_ocr_ch":
+        return extract_bubbles_rapid_ocr(orig_img, bubbles, lang="ch")
+    else:  # "manga_ocr" mặc định
+        return extract_bubbles_manga_ocr(orig_img, bubbles)
+
+
 # =====================================================================
 # 7. GOOGLE TRANSLATE (DỊCH TEXT THUẦN SIÊU TỐC & MIỄN PHÍ)
 # =====================================================================
@@ -724,14 +811,14 @@ def save_json_safely(filepath: str, data: dict):
 def process_pages_stream(chapter_id: str, title_str: str, pages_tasks: list,
                          api_key: str = None, base_url: str = None, model: str = None,
                          max_api_workers: int = 10, pipeline_type: str = None,
-                         translation_provider: str = None, t_start: float = None,
-                         progress_callback=None):
+                         translation_provider: str = None, ocr_engine: str = None,
+                         t_start: float = None, progress_callback=None):
     """
     Băng chuyền Streaming cốt lõi:
     - Nhận danh sách các trang (MangaDex hoặc Local).
     - Detect GPU DirectML tuần tự siêu nhanh (~170ms/trang).
     - Hỗ trợ 2 Pipeline:
-      1. ocr_trans: Dùng Manga-OCR bóc chữ -> Gửi LLM Text, Google Translate, hoặc giữ Raw
+      1. ocr_trans: Dùng Manga-OCR hoặc RapidOCR bóc chữ -> Gửi LLM Text, Google Translate, hoặc giữ Raw
       2. image_trans: Đánh số nhãn Set-of-Mark -> Gửi Vision LLM (Qwen/Gemini)
     - Ghi file JSON ngay khi từng trang hoàn thành (Time-To-First-Read cực thấp).
     """
@@ -741,6 +828,7 @@ def process_pages_stream(chapter_id: str, title_str: str, pages_tasks: list,
     model = model or cfg.get("model", MODEL_NAME)
     pipeline_type = pipeline_type or cfg.get("pipeline_type", "ocr_trans")
     translation_provider = translation_provider or cfg.get("translation_provider", "google")
+    ocr_engine = ocr_engine or cfg.get("ocr_engine", "manga_ocr")
 
     if pipeline_type == "image_trans":
         translation_provider = "vision_llm"
@@ -781,9 +869,17 @@ def process_pages_stream(chapter_id: str, title_str: str, pages_tasks: list,
     detector_session.run(None, {'images': dummy})
     print(f"✓ Detector sẵn sàng trong {(time.perf_counter() - t_init)*1000:.0f} ms!\n")
 
-    # Nếu dùng ocr_trans, warm-up trước MangaOcr
+    # Nếu dùng ocr_trans, warm-up engine OCR tương ứng
     if pipeline_type == "ocr_trans":
-        get_manga_ocr()
+        try:
+            if ocr_engine == "rapid_ocr_en":
+                get_rapid_ocr(lang="en")
+            elif ocr_engine == "rapid_ocr_ch":
+                get_rapid_ocr(lang="ch")
+            else:
+                get_manga_ocr()
+        except Exception as ocr_init_err:
+            print(f"⚠️ Cảnh báo khởi tạo OCR engine ({ocr_engine}): {ocr_init_err}")
 
     output_file = os.path.join(OUTPUT_DIR, f"{chapter_id}_translated.json")
 
@@ -865,9 +961,9 @@ def process_pages_stream(chapter_id: str, title_str: str, pages_tasks: list,
         # -----------------------------------------------------------------
         if pipeline_type == "ocr_trans":
             t_ocr_start = time.perf_counter()
-            extract_bubbles_manga_ocr(orig_img, bubbles)
+            extract_bubbles_ocr(orig_img, bubbles, ocr_engine=ocr_engine)
             ocr_ms = (time.perf_counter() - t_ocr_start) * 1000
-            print(f"⚡ [Trang {p_num:02d}/{total_pages:02d}] Detect ({det_ms:.0f}ms) + Manga-OCR ({ocr_ms:.0f}ms, {len(bubbles):>2d} bubbles) ➔ Dịch [{translation_provider}]...")
+            print(f"⚡ [Trang {p_num:02d}/{total_pages:02d}] Detect ({det_ms:.0f}ms) + OCR [{ocr_engine}] ({ocr_ms:.0f}ms, {len(bubbles):>2d} bubbles) ➔ Dịch [{translation_provider}]...")
 
             if translation_provider == "raw":
                 # Chế độ Raw: Giữ nguyên tiếng Nhật, hoàn tất tức thì
@@ -1064,7 +1160,7 @@ def process_pages_stream(chapter_id: str, title_str: str, pages_tasks: list,
 def run_manga_chapter_pipeline(chapter_input: str, max_pages: int = None, max_api_workers: int = None,
                                api_key: str = None, base_url: str = None, model: str = None,
                                pipeline_type: str = None, translation_provider: str = None,
-                               progress_callback=None):
+                               ocr_engine: str = None, progress_callback=None):
     """Pipeline tải và dịch chapter từ MangaDex URL / Chapter ID."""
     cfg = load_config()
     api_key = api_key or cfg.get("api_key", XKIRO_API_KEY)
@@ -1074,14 +1170,6 @@ def run_manga_chapter_pipeline(chapter_input: str, max_pages: int = None, max_ap
     translation_provider = translation_provider or cfg.get("translation_provider", "google")
     if max_api_workers is None:
         max_api_workers = int(cfg.get("max_workers", 10))
-
-    print("=" * 80)
-    print(" 🚀 PIPELINE DỊCH MANGADEX STREAMING: TẢI ĐẾN ĐÂU ➔ DETECT & DỊCH NGAY ĐẾN ĐÓ")
-    print(f" ⚙️ Pipeline: {pipeline_type} | Bộ dịch: {translation_provider}")
-    print(f" 🎯 Model: {model} (Base URL: {base_url})")
-    print(f" 🌐 Ngôn ngữ: {SOURCE_LANG} ➔ {TARGET_LANG}")
-    print(f" ⚡ Chế độ: Bắn API song song ngay lập tức khi có ảnh, tối đa {max_api_workers} luồng API!")
-    print("=" * 80, "\n")
 
     chapter_id, url_page = extract_chapter_id_and_page(chapter_input)
     print(f"🔎 Đang truy vấn thông tin Chapter ID: {chapter_id} từ MangaDex...")
@@ -1096,10 +1184,33 @@ def run_manga_chapter_pipeline(chapter_input: str, max_pages: int = None, max_ap
     total_pages = chap_data["total_pages"]
     meta = chap_data["metadata"]
 
+    # Xử lý tự động nhận diện ngôn ngữ vs ghi đè thủ công
+    if not ocr_engine:
+        if cfg.get("auto_detect_lang", True):
+            md_lang = (meta.get("lang") or "en").lower()
+            if md_lang == "ja":
+                ocr_engine = "manga_ocr"
+            elif md_lang.startswith("zh"):
+                ocr_engine = "rapid_ocr_ch"
+            else:
+                ocr_engine = "rapid_ocr_en"
+            print(f"🤖 Tự động chọn OCR engine theo nhãn MangaDex [{md_lang}]: {ocr_engine}")
+        else:
+            ocr_engine = cfg.get("ocr_engine", "manga_ocr")
+    else:
+        print(f"🔒 Sử dụng OCR engine được chỉ định thủ công (bỏ qua nhãn MangaDex): {ocr_engine}")
+
     title_str = f"Chương {meta.get('chapter', '?')} - {meta.get('title', 'Không tiêu đề')}"
-    print(f"✓ Tìm thấy: {title_str}")
-    print(f"✓ Tổng số trang: {total_pages} trang ({chap_data['mode']} mode)")
-    print(f"✓ Ngôn ngữ gốc trên MangaDex: {meta.get('lang', 'en')}\n")
+    print("=" * 80)
+    print(" 🚀 PIPELINE DỊCH MANGADEX STREAMING: TẢI ĐẾN ĐÂU ➔ DETECT & DỊCH NGAY ĐẾN ĐÓ")
+    print(f" ⚙️ Pipeline: {pipeline_type} | Bộ dịch: {translation_provider} | OCR: {ocr_engine}")
+    print(f" 🎯 Model: {model} (Base URL: {base_url})")
+    print(f" 🌐 Ngôn ngữ: {SOURCE_LANG} ➔ {TARGET_LANG}")
+    print(f" ⚡ Chế độ: Bắn API song song ngay lập tức khi có ảnh, tối đa {max_api_workers} luồng API!")
+    print(f" ✓ Tìm thấy: {title_str}")
+    print(f" ✓ Tổng số trang: {total_pages} trang ({chap_data['mode']} mode)")
+    print(f" ✓ Ngôn ngữ gốc trên MangaDex: {meta.get('lang', 'en')}")
+    print("=" * 80, "\n")
 
     chap_cache_dir = os.path.join(CACHE_DIR, chapter_id)
     os.makedirs(chap_cache_dir, exist_ok=True)
@@ -1125,6 +1236,7 @@ def run_manga_chapter_pipeline(chapter_input: str, max_pages: int = None, max_ap
         max_api_workers=max_api_workers,
         pipeline_type=pipeline_type,
         translation_provider=translation_provider,
+        ocr_engine=ocr_engine,
         t_start=t_start,
         progress_callback=progress_callback
     )
@@ -1133,7 +1245,7 @@ def run_local_images_pipeline(chapter_id: str, title: str, image_items: list,
                               max_pages: int = None, max_api_workers: int = None,
                               api_key: str = None, base_url: str = None, model: str = None,
                               pipeline_type: str = None, translation_provider: str = None,
-                              progress_callback=None):
+                              ocr_engine: str = None, progress_callback=None):
     """
     Pipeline dịch trực tiếp từ danh sách file ảnh cục bộ (Local Images).
     image_items có thể là:
@@ -1146,6 +1258,7 @@ def run_local_images_pipeline(chapter_id: str, title: str, image_items: list,
     model = model or cfg.get("model", MODEL_NAME)
     pipeline_type = pipeline_type or cfg.get("pipeline_type", "ocr_trans")
     translation_provider = translation_provider or cfg.get("translation_provider", "google")
+    ocr_engine = ocr_engine or cfg.get("ocr_engine", "manga_ocr")
     if max_api_workers is None:
         max_api_workers = int(cfg.get("max_workers", 10))
 
@@ -1197,7 +1310,7 @@ def run_local_images_pipeline(chapter_id: str, title: str, image_items: list,
     print("=" * 80)
     print(f" 🚀 PIPELINE DỊCH LOCAL MANGA IMAGES: {title}")
     print(f" 📁 Chapter ID: {chapter_id} | Tổng số trang: {len(pages_tasks)}")
-    print(f" ⚙️ Pipeline: {pipeline_type} | Bộ dịch: {translation_provider}")
+    print(f" ⚙️ Pipeline: {pipeline_type} | Bộ dịch: {translation_provider} | OCR: {ocr_engine}")
     print(f" 🎯 Model: {model} (Base URL: {base_url})")
     print("=" * 80, "\n")
 
@@ -1211,6 +1324,7 @@ def run_local_images_pipeline(chapter_id: str, title: str, image_items: list,
         max_api_workers=max_api_workers,
         pipeline_type=pipeline_type,
         translation_provider=translation_provider,
+        ocr_engine=ocr_engine,
         t_start=t_start,
         progress_callback=progress_callback
     )

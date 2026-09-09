@@ -11,8 +11,9 @@ Chào mừng bạn đến với **Manga Translator AI** — Giải pháp dịch 
 
 1. **⚡ Chế Độ Miễn Phí 100% (Không Cần API Key):**
    - Sử dụng **Comic-Text-Detector** định vị khung thoại trên GPU/CPU.
-   - Sử dụng **Manga-OCR** bóc chữ tiếng Nhật gốc trực tiếp trên máy.
-   - Dịch qua **Google Translate API** hoàn toàn miễn phí, tốc độ ~0.5s / trang!
+   - Hỗ trợ 3 Engine OCR: **Manga-OCR** (chuyên Manga Nhật), **RapidOCR EN** (chuyên Comic tiếng Anh / font scanlation), **RapidOCR CH** (chuyên Manhua tiếng Trung).
+   - Tự động nhận diện ngôn ngữ chương truyện trên MangaDex kèm tính năng ghi đè thủ công khi nhãn bị sai.
+   - Dịch qua **Google Translate API** hoàn toàn miễn phí, tốc độ ~0.2s - 0.5s / trang!
 2. **🤖 Hỗ Trợ Mô Hình AI Ngôn Ngữ Lớn (LLM):**
    - Có thể cấu hình API Key để dịch bằng **Qwen 3.5**, **Gemini**, **OpenAI GPT-4o**, v.v. để câu văn mượt mà, chuẩn văn phong truyện tranh.
 3. **📖 Đa Nền Tảng:**

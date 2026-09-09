@@ -8,5 +8,7 @@
   "server_port": 8765,
   "max_workers": 10,
   "pipeline_type": "ocr_trans",
-  "translation_provider": "google"
+  "translation_provider": "google",
+  "ocr_engine": "manga_ocr",
+  "auto_detect_lang": true
 }

@@ -170,6 +170,31 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(resp_data, ensure_ascii=False).encode("utf-8"))
             return
 
+        # 3.5. API: Lấy metadata chi tiết của chapter (ngôn ngữ, số trang, tiêu đề)
+        if path == "/api/chapter-info":
+            cid = params.get("id", [""])[0]
+            if not cid:
+                self.send_error(400, "Missing id parameter")
+                return
+            try:
+                from mangadex_batch_translator import fetch_mangadex_chapter_info
+                c_info = fetch_mangadex_chapter_info(cid)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": True,
+                    "chapter_id": cid,
+                    "metadata": c_info.get("metadata", {}),
+                    "total_pages": c_info.get("total_pages", 0)
+                }, ensure_ascii=False).encode("utf-8"))
+            except Exception as e:
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": False, "message": str(e)}, ensure_ascii=False).encode("utf-8"))
+            return
+
         # 4. Stream ảnh từ thư mục cache cho Local Web Reader: /images/{chapter_id}/{filename}
         m_img = re.match(r"^/images/([^/]+)/([^/]+)$", path)
         if m_img:
@@ -342,6 +367,7 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             override_model = payload.get("model")
             override_pipeline = payload.get("pipeline_type")
             override_provider = payload.get("translation_provider")
+            override_ocr_engine = payload.get("ocr_engine")
 
             with translations_lock:
                 if cid in active_translations and active_translations[cid]["status"] == "running":
@@ -362,7 +388,8 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                         base_url=override_url,
                         model=override_model,
                         pipeline_type=override_pipeline,
-                        translation_provider=override_provider
+                        translation_provider=override_provider,
+                        ocr_engine=override_ocr_engine
                     )
                     with translations_lock:
                         active_translations[cid] = {"status": "done", "message": "Hoàn tất"}
@@ -411,6 +438,7 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             custom_title = ""
             custom_pipeline = ""
             custom_provider = ""
+            custom_ocr_engine = ""
 
             for part in msg.iter_parts():
                 disp_name = part.get_param("name", header="content-disposition")
@@ -432,6 +460,10 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                     raw_val = part.get_payload(decode=True)
                     if raw_val:
                         custom_provider = raw_val.decode("utf-8", errors="replace").strip()
+                elif disp_name == "ocr_engine":
+                    raw_val = part.get_payload(decode=True)
+                    if raw_val:
+                        custom_ocr_engine = raw_val.decode("utf-8", errors="replace").strip()
 
             if not uploaded_files:
                 self.send_response(400)
@@ -490,6 +522,7 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                         image_items=local_image_items,
                         pipeline_type=custom_pipeline or None,
                         translation_provider=custom_provider or None,
+                        ocr_engine=custom_ocr_engine or None,
                         progress_callback=_on_prog
                     )
                     with translations_lock:

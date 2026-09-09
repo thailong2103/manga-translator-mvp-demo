@@ -98,18 +98,28 @@ Hệ thống hoạt động theo mô hình **Client-Server cục bộ (Local Dec
 
 ---
 
-### Engine 2: Manga-OCR ONNX (Bóc tách chữ tiếng Nhật)
-* **File mô hình:** `mayocream/manga-ocr-onnx` (~870 MB gồm `encoder_model.onnx` và `decoder_model.onnx`).
-* **Kiến trúc:** Vision Transformer (ViT) làm Encoder kết hợp với RoBERTa/BERT làm Decoder tự hồi quy (Autoregressive).
-* **Điểm đột phá của kiến trúc không dùng PyTorch (Torchless):**
-  - Bản phân phối sử dụng `manga-ocr-torchless` kết hợp `transformers` và `onnxruntime`.
-  - Không cần cài bộ thư viện PyTorch nặng hơn 2.5 GB.
-  - Tự động chuyển đổi xử lý ảnh qua thư viện chuẩn `PIL.Image` và `ViTImageProcessorPil`.
-* **Logic hoạt động:**
-  1. Nhận danh sách các ô thoại `[x, y, w, h]` từ Engine 1.
-  2. Cắt các mảnh ảnh nhỏ (Crop) tương ứng với từng bong bóng thoại.
-  3. Đưa qua mô hình ONNX để giải mã trực tiếp chữ Hán (Kanji), Hiragana, Katakana và Furigana dọc/ngang.
-  4. Chuẩn hóa chuỗi văn bản bằng `jaconv` để xử lý khoảng trắng, dấu ngoặc và dạng chữ nửa độ rộng (Half-width).
+### Engine 2: Multi-Engine OCR Torchless (Bóc tách chữ đa ngôn ngữ Nhật - Anh - Trung)
+
+Hệ thống hỗ trợ 3 mô hình OCR cục bộ chạy hoàn toàn không cần PyTorch (Torchless), sử dụng trực tiếp `onnxruntime-directml`:
+
+1. **Manga-OCR ONNX (`manga_ocr`) - Chuyên Tiếng Nhật**:
+   * **File mô hình:** `mayocream/manga-ocr-onnx` (~870 MB).
+   * **Kiến trúc:** Vision Transformer (ViT) Encoder + RoBERTa/BERT Decoder tự hồi quy (`cl-tohoku/bert-base-japanese-char`).
+   * **Thế mạnh:** Bóc tách tuyệt đối chuẩn xác Kanji phức tạp, Hiragana, Katakana, Furigana dọc/ngang và chữ viết tay trong Manga gốc.
+   * **Chuẩn hóa:** Dùng `jaconv` để xử lý khoảng trắng, dấu ngoặc và dạng chữ nửa độ rộng (Half-width).
+
+2. **RapidOCR ONNX (`rapid_ocr_en`) - Chuyên Tiếng Anh / Ký tự Latinh**:
+   * **Nền tảng:** PaddleOCR ONNX siêu nhẹ (~15 MB).
+   * **Thế mạnh:** Nhận diện xuất sắc các font chữ Comic hoa/thường, chữ nghệ thuật trong bản dịch scanlation tiếng Anh.
+   * **Bảo toàn khoảng trắng:** Tự động sắp xếp các dòng thoại theo tọa độ y từ trên xuống dưới và nối bằng dấu cách chuẩn xác (`" ".join(...)`), không bị lỗi dính chữ như Manga-OCR.
+
+3. **RapidOCR ONNX (`rapid_ocr_ch`) - Chuyên Tiếng Trung**:
+   * **Nền tảng:** PaddleOCR ONNX hỗ trợ chữ Hán Giản thể (Simplified) và Phồn thể (Traditional).
+   * **Thế mạnh:** Bóc tách trọn vẹn câu thoại trong Manhua Trung Quốc, loại bỏ khoảng cách thừa.
+
+* **Cơ chế Tự Động Nhận Diện & Ghi Đè Thủ Công (Auto-detect & Manual Override):**
+  - **Tự động nhận diện (Auto-detect)**: Khi người dùng mở một chapter trên MangaDex, frontend đọc thuộc tính `translatedLanguage` (`ja`, `en`, `zh`, ...). Hệ thống tự động kích hoạt Engine OCR tương ứng (`ja` ➔ Manga-OCR, `zh` ➔ RapidOCR Trung, `en`/khác ➔ RapidOCR Anh).
+  - **Tính năng loại trừ nhãn sai (Manual Override)**: Khi người dùng bấm chọn thủ công một Engine OCR trên thanh menu, hệ thống sẽ **khóa cứng (Lock)** lựa chọn đó cho chapter hiện tại, ngăn thuật toán tự động can thiệp (hữu ích khi uploader trên MangaDex gắn nhầm cờ ngôn ngữ). Người dùng có thể nhấn `↺ Auto` để khôi phục bất kỳ lúc nào.
 
 ---
 

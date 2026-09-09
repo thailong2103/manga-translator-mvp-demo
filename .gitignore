@@ -12,6 +12,9 @@ __pycache__/
 # Mô hình AI nặng (sẽ tải bằng download_models.py)
 models/*.onnx
 models/.cache/
+models/rapidocr/
+.rapidocr/
+*.onnx
 
 # Dữ liệu tạm thời & cache truyện
 cache_chapters/

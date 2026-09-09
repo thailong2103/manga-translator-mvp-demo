@@ -802,11 +802,45 @@
                 </button>
             </div>
 
-            <!-- 2. TRANSLATION PROVIDER (CHO OCR_TRANS) -->
+            <!-- 2. OCR ENGINE SELECTOR (CHO OCR_TRANS) -->
+            <div id="ocrEngineSection">
+                <div class="section-title" style="margin-top: 15px;">
+                    <span class="icon">🔍</span>
+                    <span>Mô Hình Bóc Chữ (OCR Engine)</span>
+                </div>
+                <div class="provider-grid" id="ocrEngineGrid">
+                    <button type="button" class="provider-card active" data-ocr="manga_ocr">
+                        <div class="provider-title">🇯🇵 Manga-OCR (Tiếng Nhật)</div>
+                        <div class="provider-desc">Bóc chữ Manga gốc: Kanji, Hiragana, Katakana, Furigana dọc & ngang.</div>
+                    </button>
+                    <button type="button" class="provider-card" data-ocr="rapid_ocr_en">
+                        <div class="provider-title">🇬🇧 RapidOCR (Tiếng Anh / Latinh)</div>
+                        <div class="provider-desc">Chuẩn font Comic, giữ nguyên khoảng trắng và dấu câu tiếng Anh.</div>
+                    </button>
+                    <button type="button" class="provider-card" data-ocr="rapid_ocr_ch">
+                        <div class="provider-title">🇨🇳 RapidOCR (Tiếng Trung)</div>
+                        <div class="provider-desc">Chuyên trị Manhua Trung Quốc, bóc chuẩn chữ Hán Giản & Phồn thể.</div>
+                    </button>
+                </div>
+
+                <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div>
+                        <div style="font-weight: 600; font-size: 13px; color: var(--text-color);">🤖 Tự động nhận diện theo MangaDex</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Tự chọn Manga-OCR (Nhật) hoặc RapidOCR (Anh/Trung) khi mở chapter. Bạn vẫn có thể chọn thủ công để ghi đè nhãn sai.</div>
+                    </div>
+                    <label style="position: relative; display: inline-block; width: 44px; height: 24px; margin-left: 12px; flex-shrink: 0; cursor: pointer;">
+                        <input type="checkbox" id="autoDetectLangCheckbox" checked style="opacity: 0; width: 0; height: 0;">
+                        <span id="autoDetectSlider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--accent-primary, #6366f1); transition: .3s; border-radius: 24px;"></span>
+                        <span id="autoDetectKnob" style="position: absolute; content: ''; height: 18px; width: 18px; left: 22px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 3. TRANSLATION PROVIDER (CHO OCR_TRANS) -->
             <div id="ocrProvidersSection">
-                <div class="section-title" style="margin-top: 10px;">
+                <div class="section-title" style="margin-top: 15px;">
                     <span class="icon">🌐</span>
-                    <span>Bộ Dịch Cho Văn Bản Manga-OCR</span>
+                    <span>Bộ Dịch Cho Văn Bản OCR</span>
                 </div>
                 <div class="provider-grid" id="providerGrid">
                     <button type="button" class="provider-card active" data-provider="google">
@@ -991,6 +1025,8 @@
         let activeProfileId = 'xkiro_qwen';
         let currentPipeline = 'ocr_trans';
         let currentProvider = 'google';
+        let currentOcrEngine = 'manga_ocr';
+        let autoDetectLang = true;
 
         const QUICK_TEMPLATES = {
             deepseek: {
@@ -1095,13 +1131,38 @@
             elements.alertBox.style.display = 'none';
         }
 
-        // Cập nhật giao diện Pipeline & Provider
+        const ocrEngineSection = document.getElementById('ocrEngineSection');
+        const ocrButtons = document.querySelectorAll('#ocrEngineGrid .provider-card');
+        const autoDetectLangCheckbox = document.getElementById('autoDetectLangCheckbox');
+        const autoDetectSlider = document.getElementById('autoDetectSlider');
+        const autoDetectKnob = document.getElementById('autoDetectKnob');
+
+        function updateToggleSwitchUI() {
+            if (autoDetectLangCheckbox && autoDetectSlider && autoDetectKnob) {
+                if (autoDetectLangCheckbox.checked) {
+                    autoDetectSlider.style.backgroundColor = 'var(--accent-primary, #6366f1)';
+                    autoDetectKnob.style.left = '22px';
+                } else {
+                    autoDetectSlider.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                    autoDetectKnob.style.left = '4px';
+                }
+            }
+        }
+        if (autoDetectLangCheckbox) {
+            autoDetectLangCheckbox.addEventListener('change', () => {
+                autoDetectLang = autoDetectLangCheckbox.checked;
+                updateToggleSwitchUI();
+            });
+        }
+
+        // Cập nhật giao diện Pipeline, OCR Engine & Provider
         function updateModeUI() {
             pipelineButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-pipeline') === currentPipeline);
             });
 
             if (currentPipeline === 'image_trans') {
+                if (ocrEngineSection) ocrEngineSection.style.display = 'none';
                 if (ocrProvidersSection) ocrProvidersSection.style.display = 'none';
                 if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
                 if (modeInfoText) modeInfoText.textContent = '🖼️ Image + Trans (Vision AI): Dùng mô hình Multimodal Vision LLM đọc tranh Set-of-Mark và dịch trực tiếp.';
@@ -1110,28 +1171,34 @@
                 elements.modelName.required = true;
                 if (elements.profilesGrid) elements.profilesGrid.classList.remove('dimmed-section');
             } else {
+                if (ocrEngineSection) ocrEngineSection.style.display = 'block';
                 if (ocrProvidersSection) ocrProvidersSection.style.display = 'block';
+
+                ocrButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-ocr') === currentOcrEngine);
+                });
+
                 providerButtons.forEach(btn => {
                     btn.classList.toggle('active', btn.getAttribute('data-provider') === currentProvider);
                 });
 
                 if (currentProvider === 'google') {
                     if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
-                    if (modeInfoText) modeInfoText.textContent = '🌐 Manga-OCR + Google Translate: Chạy bóc chữ offline và dịch Google miễn phí. Không bắt buộc cấu hình API Key bên dưới.';
+                    if (modeInfoText) modeInfoText.textContent = '🌐 OCR + Google Translate: Bóc chữ và dịch Google miễn phí. Không bắt buộc cấu hình API Key bên dưới.';
                     elements.apiKey.required = false;
                     elements.baseUrl.required = false;
                     elements.modelName.required = false;
                     if (elements.profilesGrid) elements.profilesGrid.classList.add('dimmed-section');
                 } else if (currentProvider === 'raw') {
                     if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
-                    if (modeInfoText) modeInfoText.textContent = '📝 Manga-OCR Raw: Bóc tách và giữ nguyên chữ gốc tiếng Nhật 100% offline. Không cần API Key.';
+                    if (modeInfoText) modeInfoText.textContent = '📝 OCR Raw: Bóc tách và giữ nguyên chữ gốc 100% offline. Không cần API Key.';
                     elements.apiKey.required = false;
                     elements.baseUrl.required = false;
                     elements.modelName.required = false;
                     if (elements.profilesGrid) elements.profilesGrid.classList.add('dimmed-section');
                 } else {
                     if (modeInfoBanner) modeInfoBanner.style.display = 'flex';
-                    if (modeInfoText) modeInfoText.textContent = '🤖 Manga-OCR + LLM Text-only: Manga-OCR bóc chữ rồi gửi text thuần lên LLM. Tiết kiệm token, dịch mượt theo ngữ cảnh!';
+                    if (modeInfoText) modeInfoText.textContent = '🤖 OCR + LLM Text-only: Bóc chữ rồi gửi text thuần lên LLM. Tiết kiệm token, dịch mượt theo ngữ cảnh!';
                     elements.apiKey.required = true;
                     elements.baseUrl.required = true;
                     elements.modelName.required = true;
@@ -1143,6 +1210,13 @@
         pipelineButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 currentPipeline = btn.getAttribute('data-pipeline');
+                updateModeUI();
+            });
+        });
+
+        ocrButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentOcrEngine = btn.getAttribute('data-ocr');
                 updateModeUI();
             });
         });
@@ -1390,6 +1464,12 @@
 
                     currentPipeline = appConfig.pipeline_type || 'ocr_trans';
                     currentProvider = appConfig.translation_provider || 'google';
+                    currentOcrEngine = appConfig.ocr_engine || 'manga_ocr';
+                    autoDetectLang = appConfig.auto_detect_lang !== false;
+                    if (autoDetectLangCheckbox) {
+                        autoDetectLangCheckbox.checked = autoDetectLang;
+                        updateToggleSwitchUI();
+                    }
                     updateModeUI();
                 }
             } catch (err) {
@@ -1452,6 +1532,8 @@
                 active_profile: activeProfileId,
                 pipeline_type: currentPipeline,
                 translation_provider: currentPipeline === 'image_trans' ? 'vision_llm' : currentProvider,
+                ocr_engine: currentOcrEngine,
+                auto_detect_lang: autoDetectLang,
                 base_url: elements.baseUrl.value.trim(),
                 api_key: elements.apiKey.value.trim(),
                 model: elements.modelName.value.trim(),

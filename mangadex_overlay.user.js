@@ -37,6 +37,10 @@
         isSettingsView: false,
         selectedPipeline: localStorage.getItem('md_selected_pipeline') || 'ocr_trans',
         selectedProvider: localStorage.getItem('md_selected_provider') || 'google',
+        selectedOcrEngine: localStorage.getItem('md_selected_ocr_engine') || 'manga_ocr',
+        autoDetectLang: localStorage.getItem('md_auto_detect_lang') !== 'false',
+        isManualOverride: false, // Cờ khóa thủ công: loại trừ khi nhãn ngôn ngữ bị sai
+        detectedLang: null,
         serverStatus: 'disconnected', // 'connected' | 'translating' | 'ready' | 'disconnected'
         bubbleOpacity: parseFloat(localStorage.getItem('md_overlay_opacity') || CONFIG.DEFAULT_OPACITY),
         fontScale: parseFloat(localStorage.getItem('md_overlay_font_scale') || CONFIG.DEFAULT_FONT_SCALE),
@@ -790,13 +794,24 @@
                                 <!-- MODE SWITCHER TOOLBAR -->
                                 <div class="mode-switcher-container">
                                     <div class="mode-tabs">
-                                        <button type="button" class="mode-tab active" id="tabOcrTrans" title="Bóc chữ bằng Manga-OCR trước rồi dịch">⚡ OCR + Dịch</button>
+                                        <button type="button" class="mode-tab active" id="tabOcrTrans" title="Bóc chữ bằng Manga-OCR/RapidOCR trước rồi dịch">⚡ OCR + Dịch</button>
                                         <button type="button" class="mode-tab" id="tabImageTrans" title="Gửi toàn ảnh kèm đánh số Set-of-Mark">🖼️ Ảnh + Vision</button>
                                     </div>
-                                    <div class="sub-providers-row" id="subProvidersRow">
+                                    <!-- OCR ENGINE SELECTOR (CHO OCR_TRANS) -->
+                                    <div class="sub-providers-row" id="ocrEngineRow" style="margin-top: 4px;">
+                                        <button type="button" class="sub-pill active" data-ocr="manga_ocr" title="Manga-OCR: Chuyên bóc Manga tiếng Nhật">🇯🇵 Nhật (MangaOCR)</button>
+                                        <button type="button" class="sub-pill" data-ocr="rapid_ocr_en" title="RapidOCR: Chuyên Comic tiếng Anh & Latinh">🇬🇧 Anh (RapidOCR)</button>
+                                        <button type="button" class="sub-pill" data-ocr="rapid_ocr_ch" title="RapidOCR: Chuyên Manhua tiếng Trung">🇨🇳 Trung (RapidOCR)</button>
+                                    </div>
+                                    <!-- AUTO DETECT STATUS & MANUAL OVERRIDE BAR -->
+                                    <div id="ocrAutoDetectBar" style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                                        <span id="ocrAutoDetectText" style="color: #a1a1aa;">🤖 Auto: BẬT</span>
+                                        <button type="button" id="btnToggleAutoLang" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #e4e4e7; border-radius: 4px; font-size: 10px; cursor: pointer; padding: 1px 6px;">Tắt</button>
+                                    </div>
+                                    <div class="sub-providers-row" id="subProvidersRow" style="margin-top: 4px;">
                                         <button type="button" class="sub-pill active" data-prov="google" title="Google Translate (Miễn phí)">🌐 Google</button>
                                         <button type="button" class="sub-pill" data-prov="llm_text" title="Gửi text thuần lên LLM">🤖 LLM Text</button>
-                                        <button type="button" class="sub-pill" data-prov="raw" title="Giữ nguyên chữ tiếng Nhật gốc">📝 Raw Gốc</button>
+                                        <button type="button" class="sub-pill" data-prov="raw" title="Giữ nguyên chữ gốc">📝 Raw Gốc</button>
                                     </div>
                                 </div>
 
@@ -933,21 +948,51 @@
                 }
             });
 
-            // 1.5. Chuyển đổi Pipeline và Provider Dịch Thuật
+            // 1.5. Chuyển đổi Pipeline, OCR Engine và Provider Dịch Thuật
             const tabOcrTrans = root.getElementById('tabOcrTrans');
             const tabImageTrans = root.getElementById('tabImageTrans');
+            const ocrEngineRow = root.getElementById('ocrEngineRow');
+            const ocrAutoDetectBar = root.getElementById('ocrAutoDetectBar');
+            const ocrAutoDetectText = root.getElementById('ocrAutoDetectText');
+            const btnToggleAutoLang = root.getElementById('btnToggleAutoLang');
             const subProvidersRow = root.getElementById('subProvidersRow');
-            const subPills = root.querySelectorAll('.sub-pill');
+            const ocrPills = root.querySelectorAll('#ocrEngineRow .sub-pill');
+            const subPills = root.querySelectorAll('#subProvidersRow .sub-pill');
 
             const renderModeSwitcher = () => {
                 const isOcr = State.selectedPipeline === 'ocr_trans';
                 if (tabOcrTrans) tabOcrTrans.classList.toggle('active', isOcr);
                 if (tabImageTrans) tabImageTrans.classList.toggle('active', !isOcr);
+                if (ocrEngineRow) ocrEngineRow.style.display = isOcr ? 'flex' : 'none';
+                if (ocrAutoDetectBar) ocrAutoDetectBar.style.display = isOcr ? 'flex' : 'none';
                 if (subProvidersRow) subProvidersRow.style.display = isOcr ? 'flex' : 'none';
+
+                ocrPills.forEach(p => {
+                    p.classList.toggle('active', p.getAttribute('data-ocr') === State.selectedOcrEngine);
+                });
+
                 subPills.forEach(p => {
                     p.classList.toggle('active', p.getAttribute('data-prov') === State.selectedProvider);
                 });
+
+                if (ocrAutoDetectText && btnToggleAutoLang) {
+                    if (State.isManualOverride) {
+                        ocrAutoDetectText.innerHTML = `<span style="color:#fbbf24; font-weight:600;">🔒 Thủ công (Khóa nhãn)</span>`;
+                        btnToggleAutoLang.textContent = '↺ Auto';
+                        btnToggleAutoLang.title = 'Khôi phục tự động nhận diện theo MangaDex';
+                    } else if (State.autoDetectLang) {
+                        const langBadge = State.detectedLang ? `[${State.detectedLang.toUpperCase()}]` : '';
+                        ocrAutoDetectText.innerHTML = `🤖 Auto: <span style="color:#34d399; font-weight:600;">BẬT ${langBadge}</span>`;
+                        btnToggleAutoLang.textContent = 'Tắt';
+                        btnToggleAutoLang.title = 'Tắt tự động nhận diện ngôn ngữ';
+                    } else {
+                        ocrAutoDetectText.innerHTML = `🤖 Auto: <span style="color:#9ca3af;">TẮT</span>`;
+                        btnToggleAutoLang.textContent = 'Bật';
+                        btnToggleAutoLang.title = 'Bật tự động nhận diện ngôn ngữ';
+                    }
+                }
             };
+            this.renderModeSwitcher = renderModeSwitcher;
 
             if (tabOcrTrans) {
                 tabOcrTrans.addEventListener('click', (e) => {
@@ -963,6 +1008,33 @@
                     e.stopPropagation();
                     State.selectedPipeline = 'image_trans';
                     localStorage.setItem('md_selected_pipeline', 'image_trans');
+                    renderModeSwitcher();
+                });
+            }
+
+            ocrPills.forEach(p => {
+                p.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    State.selectedOcrEngine = p.getAttribute('data-ocr');
+                    localStorage.setItem('md_selected_ocr_engine', State.selectedOcrEngine);
+                    State.isManualOverride = true; // Khóa thủ công, loại trừ khi MangaDex tag nhầm nhãn
+                    renderModeSwitcher();
+                });
+            });
+
+            if (btnToggleAutoLang) {
+                btnToggleAutoLang.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (State.isManualOverride) {
+                        State.isManualOverride = false;
+                        App.detectAndApplyChapterLanguage(State.currentChapterId);
+                    } else {
+                        State.autoDetectLang = !State.autoDetectLang;
+                        localStorage.setItem('md_auto_detect_lang', State.autoDetectLang.toString());
+                        if (State.autoDetectLang) {
+                            App.detectAndApplyChapterLanguage(State.currentChapterId);
+                        }
+                    }
                     renderModeSwitcher();
                 });
             }
@@ -1938,10 +2010,52 @@
 
             State.currentChapterId = chapterId;
             State.chapterData = null;
+            State.isManualOverride = false; // Reset khóa thủ công khi sang chapter mới
             Engine.clearAll();
 
             UI.updateStatus('connected', `ID: ${chapterId.slice(0, 8)}...`);
+            await this.detectAndApplyChapterLanguage(chapterId);
             await this.checkChapterStatus(chapterId);
+        },
+
+        async detectAndApplyChapterLanguage(chapterId) {
+            if (!chapterId || !State.autoDetectLang || State.isManualOverride) return;
+            try {
+                let lang = null;
+                // Ưu tiên truy vấn qua backend local (có cache & tránh CORS)
+                try {
+                    const info = await apiRequest(`/api/chapter-info?id=${chapterId}`);
+                    if (info && info.ok && info.metadata && info.metadata.lang) {
+                        lang = info.metadata.lang.toLowerCase();
+                    }
+                } catch (e) {}
+
+                // Fallback nếu server chưa phản hồi: gọi thẳng MangaDex API
+                if (!lang) {
+                    try {
+                        const mdRes = await fetch(`https://api.mangadex.org/chapter/${chapterId}`);
+                        if (mdRes.ok) {
+                            const mdData = await mdRes.json();
+                            lang = (mdData.data?.attributes?.translatedLanguage || '').toLowerCase();
+                        }
+                    } catch (e) {}
+                }
+
+                if (lang) {
+                    State.detectedLang = lang;
+                    if (lang === 'ja') {
+                        State.selectedOcrEngine = 'manga_ocr';
+                    } else if (lang.startsWith('zh')) {
+                        State.selectedOcrEngine = 'rapid_ocr_ch';
+                    } else {
+                        State.selectedOcrEngine = 'rapid_ocr_en';
+                    }
+                    localStorage.setItem('md_selected_ocr_engine', State.selectedOcrEngine);
+                    if (UI.renderModeSwitcher) UI.renderModeSwitcher();
+                }
+            } catch (err) {
+                console.warn('[MangaOverlay] Không thể tự động nhận diện ngôn ngữ:', err);
+            }
         },
 
         async checkChapterStatus(chapterId) {
@@ -1990,7 +2104,8 @@
                     chapter_id: chapterId,
                     url: window.location.href,
                     pipeline_type: State.selectedPipeline || 'ocr_trans',
-                    translation_provider: State.selectedPipeline === 'image_trans' ? 'vision_llm' : (State.selectedProvider || 'google')
+                    translation_provider: State.selectedPipeline === 'image_trans' ? 'vision_llm' : (State.selectedProvider || 'google'),
+                    ocr_engine: State.selectedOcrEngine || 'manga_ocr'
                 });
 
                 console.log('[MangaOverlay] Bắt đầu tiến trình dịch:', res);

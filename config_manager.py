@@ -58,7 +58,9 @@ DEFAULT_CONFIG = {
     "server_port": 8765,
     "max_workers": 10,
     "pipeline_type": "ocr_trans",
-    "translation_provider": "google"
+    "translation_provider": "google",
+    "ocr_engine": "manga_ocr",
+    "auto_detect_lang": True
 }
 
 def normalize_base_url(url: str) -> str:
@@ -327,7 +329,8 @@ def save_config(new_config: dict) -> dict:
         # Cập nhật các trường hợp lệ
         valid_keys = [
             "api_key", "base_url", "model", "source_lang", "target_lang",
-            "server_port", "max_workers", "pipeline_type", "translation_provider"
+            "server_port", "max_workers", "pipeline_type", "translation_provider",
+            "ocr_engine", "auto_detect_lang"
         ]
         for k in valid_keys:
             if k in new_config and new_config[k] is not None:
@@ -361,6 +364,12 @@ def save_config(new_config: dict) -> dict:
         elif current.get("pipeline_type") == "ocr_trans":
             if current.get("translation_provider") not in ["google", "llm_text", "raw"]:
                 current["translation_provider"] = "google"
+
+        # Kiểm tra ocr_engine và auto_detect_lang
+        if current.get("ocr_engine") not in ["manga_ocr", "rapid_ocr_en", "rapid_ocr_ch"]:
+            current["ocr_engine"] = "manga_ocr"
+        if not isinstance(current.get("auto_detect_lang"), bool):
+            current["auto_detect_lang"] = True
 
         tmp_file = CONFIG_FILE + ".tmp"
         with open(tmp_file, "w", encoding="utf-8") as f:
