@@ -244,6 +244,13 @@
                 chapterSelect.appendChild(opt);
             });
 
+            if (targetChapterId && !data.chapters.some(c => c.chapter_id === targetChapterId)) {
+                const opt = document.createElement('option');
+                opt.value = targetChapterId;
+                opt.textContent = `[Đang dịch] Tập vừa tải lên`;
+                chapterSelect.insertBefore(opt, chapterSelect.firstChild);
+            }
+
             const selectedId = targetChapterId || (data.chapters[0] ? data.chapters[0].chapter_id : null);
             if (selectedId) {
                 chapterSelect.value = selectedId;
@@ -472,9 +479,10 @@
 
         // Active Profile
         activeProfileId = appConfig.active_profile || 'default';
-        currentPipeline = appConfig.pipeline || 'ocr_trans';
+        currentPipeline = appConfig.pipeline_type || appConfig.pipeline || 'ocr_trans';
         currentOcrEngine = appConfig.ocr_engine || 'manga_ocr';
-        currentProvider = appConfig.provider || 'google';
+        currentProvider = appConfig.translation_provider || appConfig.provider || 'google';
+        if (currentProvider === 'llm') currentProvider = 'llm_text';
         autoDetectLang = (appConfig.auto_detect_lang !== false);
 
         // Populate Profile dropdown
@@ -497,7 +505,7 @@
         // Current credentials
         inputApiKey.value = appConfig.api_key || '';
         inputBaseUrl.value = appConfig.base_url || 'https://api.xkiro.com/v1';
-        inputModel.value = appConfig.model || 'qwen/qwen3.5-flash:free';
+        inputModel.value = appConfig.model || 'deepseek/deepseek-v4-flash';
         inputWorkers.value = appConfig.max_workers || 10;
         switchAutoDetect.checked = autoDetectLang;
 
@@ -506,10 +514,11 @@
 
     function updateSelectionCardsUI() {
         // Pipeline
-        cardPipelineOcr.classList.toggle('active', currentPipeline === 'ocr_trans');
-        cardPipelineVision.classList.toggle('active', currentPipeline === 'vision_llm');
+        const isVision = (currentPipeline === 'image_trans' || currentPipeline === 'vision_llm');
+        cardPipelineOcr.classList.toggle('active', !isVision);
+        cardPipelineVision.classList.toggle('active', isVision);
 
-        if (currentPipeline === 'vision_llm') {
+        if (isVision) {
             sectionOcrEngine.style.display = 'none';
             sectionTranslationProvider.style.display = 'none';
         } else {
@@ -523,18 +532,24 @@
 
             // Translation Provider cards
             cardProviderGoogle.classList.toggle('active', currentProvider === 'google');
-            cardProviderLlm.classList.toggle('active', currentProvider === 'llm');
+            cardProviderLlm.classList.toggle('active', currentProvider === 'llm_text' || currentProvider === 'llm');
             cardProviderRaw.classList.toggle('active', currentProvider === 'raw');
         }
     }
 
     async function saveSettingsConfig() {
+        const isVision = (currentPipeline === 'image_trans' || currentPipeline === 'vision_llm');
+        const resolvedPipeline = isVision ? 'image_trans' : 'ocr_trans';
+        const resolvedProvider = isVision ? 'vision_llm' : (currentProvider === 'llm' ? 'llm_text' : currentProvider);
+
         const payload = {
             active_profile: activeProfileId,
-            pipeline: currentPipeline,
+            pipeline_type: resolvedPipeline,
+            pipeline: resolvedPipeline,
+            translation_provider: resolvedProvider,
+            provider: resolvedProvider,
             ocr_engine: currentOcrEngine,
             auto_detect_lang: switchAutoDetect.checked,
-            provider: currentProvider,
             base_url: inputBaseUrl.value.trim(),
             api_key: inputApiKey.value.trim(),
             model: inputModel.value.trim(),
@@ -785,8 +800,14 @@
         if (selectedFiles.length === 0) return;
 
         const title = inputChapterTitle.value.trim() || `Tập truyện ${new Date().toLocaleDateString('vi-VN')}`;
+        const isVision = (currentPipeline === 'image_trans' || currentPipeline === 'vision_llm');
+        const resolvedPipeline = isVision ? 'image_trans' : 'ocr_trans';
+        const resolvedProvider = isVision ? 'vision_llm' : (currentProvider === 'llm' ? 'llm_text' : currentProvider);
+
         const formData = new FormData();
         formData.append('title', title);
+        formData.append('pipeline_type', resolvedPipeline);
+        formData.append('translation_provider', resolvedProvider);
         formData.append('ocr_engine', currentOcrEngine);
 
         selectedFiles.forEach((f) => {
@@ -952,7 +973,8 @@
         });
 
         cardPipelineVision.addEventListener('click', () => {
-            currentPipeline = 'vision_llm';
+            currentPipeline = 'image_trans';
+            currentProvider = 'vision_llm';
             updateSelectionCardsUI();
         });
 
@@ -977,7 +999,7 @@
         });
 
         cardProviderLlm.addEventListener('click', () => {
-            currentProvider = 'llm';
+            currentProvider = 'llm_text';
             updateSelectionCardsUI();
         });
 

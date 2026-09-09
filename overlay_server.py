@@ -90,10 +90,29 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             chapters_list = []
+            seen_ids = set()
+
+            # Thêm các chapter đang dịch dở để Web Reader thấy ngay trên danh sách chọn
+            with translations_lock:
+                for cid, t_info in active_translations.items():
+                    if t_info.get("status") == "running":
+                        seen_ids.add(cid)
+                        chapters_list.append({
+                            "chapter_id": cid,
+                            "chapter_title": f"[Đang dịch] {t_info.get('title', cid)}",
+                            "total_pages": t_info.get("total_pages", 0),
+                            "translated_pages": t_info.get("completed_pages", 0),
+                            "total_elapsed_seconds": 0,
+                            "source_lang": "auto",
+                            "status": "running"
+                        })
+
             if os.path.exists(OUTPUT_DIR):
                 for f in sorted(os.listdir(OUTPUT_DIR)):
                     if f.endswith("_translated.json"):
                         cid = f.replace("_translated.json", "")
+                        if cid in seen_ids:
+                            continue
                         fpath = os.path.join(OUTPUT_DIR, f)
                         try:
                             with open(fpath, "r", encoding="utf-8") as jf:
@@ -105,9 +124,10 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                                     "translated_pages": len(data.get("pages", [])),
                                     "total_elapsed_seconds": data.get("total_elapsed_seconds", 0),
                                     "source_lang": data.get("source_language", "en"),
+                                    "status": "done"
                                 })
                         except Exception:
-                            chapters_list.append({"chapter_id": cid, "chapter_title": cid})
+                            chapters_list.append({"chapter_id": cid, "chapter_title": cid, "status": "done"})
 
             self.wfile.write(json.dumps({"chapters": chapters_list}, ensure_ascii=False).encode("utf-8"))
             return
@@ -124,7 +144,12 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                 self.send_response(404)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
-                self.wfile.write(json.dumps({"error": "Chưa có bản dịch cho chapter này"}, ensure_ascii=False).encode("utf-8"))
+                self.wfile.write(json.dumps({
+                    "ok": False,
+                    "has_translation": False,
+                    "chapter_id": cid,
+                    "error": "Chưa có bản dịch cho chapter này"
+                }, ensure_ascii=False).encode("utf-8"))
                 return
 
             self.send_response(200)
@@ -410,7 +435,7 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             return
 
         # API: Tải lên danh sách file ảnh để dịch chapter mới từ máy tính (Local Manga Upload)
-        if path == "/api/upload-chapter":
+        if path in ("/api/upload-chapter", "/api/upload-local"):
             content_type = self.headers.get("Content-Type", "")
             if "multipart/form-data" not in content_type:
                 self.send_response(400)
@@ -451,15 +476,15 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                     raw_val = part.get_payload(decode=True)
                     if raw_val:
                         custom_title = raw_val.decode("utf-8", errors="replace").strip()
-                elif disp_name == "pipeline_type":
+                elif disp_name in ("pipeline_type", "pipeline"):
                     raw_val = part.get_payload(decode=True)
                     if raw_val:
                         custom_pipeline = raw_val.decode("utf-8", errors="replace").strip()
-                elif disp_name == "translation_provider":
+                elif disp_name in ("translation_provider", "provider"):
                     raw_val = part.get_payload(decode=True)
                     if raw_val:
                         custom_provider = raw_val.decode("utf-8", errors="replace").strip()
-                elif disp_name == "ocr_engine":
+                elif disp_name in ("ocr_engine", "ocr"):
                     raw_val = part.get_payload(decode=True)
                     if raw_val:
                         custom_ocr_engine = raw_val.decode("utf-8", errors="replace").strip()
@@ -470,6 +495,22 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"ok": False, "message": "Không tìm thấy file ảnh hợp lệ nào trong request"}, ensure_ascii=False).encode("utf-8"))
                 return
+
+            # Tự động lấy cấu hình mặc định đang kích hoạt nếu form không gửi kèm
+            cfg = load_config()
+            if not custom_pipeline:
+                custom_pipeline = cfg.get("pipeline_type", "ocr_trans")
+            if not custom_provider:
+                custom_provider = cfg.get("translation_provider", "google")
+            if not custom_ocr_engine:
+                custom_ocr_engine = cfg.get("ocr_engine", "manga_ocr")
+
+            # Chuẩn hóa giá trị
+            if custom_pipeline == "vision_llm":
+                custom_pipeline = "image_trans"
+                custom_provider = "vision_llm"
+            if custom_provider == "llm":
+                custom_provider = "llm_text"
 
             # Sắp xếp số tự nhiên theo tên file gốc (1, 2, ..., 9, 10)
             uploaded_files.sort(key=lambda item: natural_sort_key(item[0]))
@@ -498,6 +539,7 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             with translations_lock:
                 active_translations[cid] = {
                     "status": "running",
+                    "title": chap_title,
                     "completed_pages": 0,
                     "total_pages": len(local_image_items),
                     "message": f"Đang dịch 0/{len(local_image_items)} trang..."

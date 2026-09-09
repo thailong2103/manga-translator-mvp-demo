@@ -199,6 +199,10 @@ def get_safe_config(full: bool = False) -> dict:
     if not full:
         safe_cfg["api_key"] = mask_api_key(top_key)
 
+    # Đồng bộ các bí danh tiện ích (pipeline, provider) để tương thích ngược 100% với Web Reader & UI
+    safe_cfg["pipeline"] = safe_cfg.get("pipeline_type", "ocr_trans")
+    safe_cfg["provider"] = safe_cfg.get("translation_provider", "google")
+
     return safe_cfg
 
 def switch_profile(profile_id: str) -> dict:
@@ -334,6 +338,29 @@ def save_config(new_config: dict) -> dict:
 
         active_id = current["active_profile"]
 
+        # Chuẩn hóa các bí danh gửi lên từ Web Reader / Extensions
+        if "pipeline" in new_config and "pipeline_type" not in new_config:
+            new_config["pipeline_type"] = new_config["pipeline"]
+        if "provider" in new_config and "translation_provider" not in new_config:
+            new_config["translation_provider"] = new_config["provider"]
+        if "translator" in new_config and "translation_provider" not in new_config:
+            new_config["translation_provider"] = new_config["translator"]
+
+        # Chuẩn hóa giá trị pipeline & provider
+        p_type = new_config.get("pipeline_type")
+        if p_type == "vision_llm":
+            new_config["pipeline_type"] = "image_trans"
+            new_config["translation_provider"] = "vision_llm"
+        elif p_type in ("ocr", "ocr_trans"):
+            new_config["pipeline_type"] = "ocr_trans"
+
+        t_prov = new_config.get("translation_provider")
+        if t_prov == "llm":
+            new_config["translation_provider"] = "llm_text"
+        elif t_prov == "vision_llm":
+            new_config["pipeline_type"] = "image_trans"
+            new_config["translation_provider"] = "vision_llm"
+
         # Cập nhật các trường hợp lệ
         valid_keys = [
             "api_key", "base_url", "model", "source_lang", "target_lang",
@@ -378,6 +405,10 @@ def save_config(new_config: dict) -> dict:
             current["ocr_engine"] = "manga_ocr"
         if not isinstance(current.get("auto_detect_lang"), bool):
             current["auto_detect_lang"] = True
+
+        # Luôn duy trì đồng bộ bí danh tiện ích để mọi tool hoặc frontend đọc mượt mà
+        current["pipeline"] = current.get("pipeline_type", "ocr_trans")
+        current["provider"] = current.get("translation_provider", "google")
 
         tmp_file = CONFIG_FILE + ".tmp"
         with open(tmp_file, "w", encoding="utf-8") as f:
