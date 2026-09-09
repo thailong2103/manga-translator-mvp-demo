@@ -29,7 +29,10 @@ import email
 from email.policy import default
 import datetime
 import httpx
-from config_manager import load_config, save_config, mask_api_key, normalize_base_url
+from config_manager import (
+    load_config, save_config, mask_api_key, normalize_base_url,
+    get_safe_config, switch_profile, add_or_update_profile, delete_profile
+)
 
 def extract_chapter_id(input_str: str) -> str:
     m = re.search(r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})", input_str, re.I)
@@ -73,10 +76,7 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
         # 0. API: Lấy cấu hình hệ thống
         if path == "/api/config":
             show_full = query.get("full", ["0"])[0] in ("1", "true")
-            cfg = load_config()
-            resp_cfg = cfg.copy()
-            if not show_full:
-                resp_cfg["api_key"] = mask_api_key(cfg.get("api_key", ""))
+            resp_cfg = get_safe_config(full=show_full)
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
@@ -244,10 +244,16 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             try:
                 payload = json.loads(body) if body else {}
                 new_cfg = save_config(payload)
+                safe_cfg = get_safe_config(full=True if payload.get("return_full") else False)
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
-                self.wfile.write(json.dumps({"ok": True, "message": "Đã lưu cấu hình thành công", "config": new_cfg}, ensure_ascii=False).encode("utf-8"))
+                self.wfile.write(json.dumps({
+                    "ok": True,
+                    "message": "Đã cập nhật cấu hình thành công",
+                    "config": safe_cfg,
+                    "active_profile": safe_cfg.get("active_profile")
+                }, ensure_ascii=False).encode("utf-8"))
             except Exception as e:
                 import traceback
                 traceback.print_exc()
@@ -262,19 +268,27 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length).decode("utf-8")
             try:
-                payload = json.loads(body)
+                payload = json.loads(body) if body else {}
             except Exception:
                 payload = {}
+            
             cfg = load_config()
-            api_key = payload.get("api_key") or cfg.get("api_key")
-            base_url = normalize_base_url(payload.get("base_url") or cfg.get("base_url"))
-            model = payload.get("model") or cfg.get("model")
+            profile_id = payload.get("profile_id")
+            if profile_id and profile_id in cfg.get("profiles", {}):
+                prof = cfg["profiles"][profile_id]
+                api_key = payload.get("api_key") or prof.get("api_key")
+                base_url = normalize_base_url(payload.get("base_url") or prof.get("base_url"))
+                model = payload.get("model") or prof.get("model")
+            else:
+                api_key = payload.get("api_key") or cfg.get("api_key")
+                base_url = normalize_base_url(payload.get("base_url") or cfg.get("base_url"))
+                model = payload.get("model") or cfg.get("model")
 
             if not api_key or not base_url or not model:
-                self.send_response(400)
+                self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
-                self.wfile.write(json.dumps({"ok": False, "message": "Thiếu API Key, Base URL hoặc Model"}, ensure_ascii=False).encode("utf-8"))
+                self.wfile.write(json.dumps({"ok": False, "message": "Thiếu API Key, Base URL hoặc Model. Vui lòng kiểm tra lại cấu hình!"}, ensure_ascii=False).encode("utf-8"))
                 return
 
             try:

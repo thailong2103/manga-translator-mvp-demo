@@ -382,21 +382,72 @@ def call_qwen_translator(api_key, base_url, model, marked_img, total_bubbles):
 _manga_ocr_instance = None
 _manga_ocr_lock = threading.Lock()
 
+class RobustMangaOcr:
+    """Load MangaOcr trực tiếp từ snapshot cache nội bộ, tránh lỗi kết nối mạng Hugging Face bị treo."""
+    def __init__(self, model_dir=None):
+        import onnxruntime as ort
+        from pathlib import Path
+        from transformers import ViTImageProcessor, BertJapaneseTokenizer
+        
+        if not model_dir:
+            cache_base = Path.home() / ".cache" / "huggingface" / "hub" / "models--mayocream--manga-ocr-onnx" / "snapshots"
+            if cache_base.exists():
+                for d in cache_base.iterdir():
+                    if d.is_dir() and (d / "encoder_model.onnx").exists():
+                        model_dir = str(d)
+                        break
+        if not model_dir or not os.path.exists(model_dir):
+            raise FileNotFoundError("Không tìm thấy local cache Manga-OCR")
+            
+        self.processor = ViTImageProcessor.from_pretrained(model_dir, local_files_only=True)
+        self.tokenizer = BertJapaneseTokenizer.from_pretrained(model_dir, local_files_only=True)
+        self.eos_token_id = self.tokenizer.sep_token_id or self.tokenizer.eos_token_id
+        self.bos_token_id = self.tokenizer.cls_token_id or self.tokenizer.bos_token_id
+        
+        providers = [p for p in ['DmlExecutionProvider', 'CPUExecutionProvider'] if p in ort.get_available_providers()]
+        self.encoder_session = ort.InferenceSession(os.path.join(model_dir, 'encoder_model.onnx'), providers=providers)
+        self.decoder_session = ort.InferenceSession(os.path.join(model_dir, 'decoder_model.onnx'), providers=providers)
+    
+    def __call__(self, img, max_length: int = 300) -> str:
+        import jaconv
+        img = img.convert('L').convert('RGB')
+        pixel_values = self.processor(img, return_tensors='np').pixel_values
+        encoder_outputs = self.encoder_session.run(None, {'pixel_values': pixel_values})
+        last_hidden_state = encoder_outputs[0]
+        input_ids = np.array([[self.bos_token_id]], dtype=np.int64)
+        for _ in range(max_length):
+            decoder_inputs = {'input_ids': input_ids, 'encoder_hidden_states': last_hidden_state}
+            try:
+                logits = self.decoder_session.run(None, decoder_inputs)[0]
+            except Exception:
+                break
+            next_token = np.argmax(logits[:, -1, :], axis=-1)[0]
+            input_ids = np.concatenate([input_ids, np.array([[next_token]], dtype=np.int64)], axis=-1)
+            if next_token == self.eos_token_id:
+                break
+        text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        text = ''.join(text.split()).replace('…', '...')
+        text = re.sub(r'[・.]{2,}', lambda x: (x.end() - x.start()) * '.', text)
+        return jaconv.h2z(text, ascii=True, digit=True)
+
 def get_manga_ocr():
-    """Khởi tạo MangaOcr một lần duy nhất (Lazy Singleton), hỗ trợ offline và tự tải online."""
+    """Khởi tạo MangaOcr một lần duy nhất (Lazy Singleton), ưu tiên load local siêu tốc 1s."""
     global _manga_ocr_instance
     with _manga_ocr_lock:
         if _manga_ocr_instance is None:
             print("⚡ Đang nạp Manga-OCR ONNX...")
             try:
-                os.environ["HF_HUB_OFFLINE"] = "1"
-                from manga_ocr import MangaOcr
-                _manga_ocr_instance = MangaOcr()
-            except Exception:
-                # Nếu chưa có trong cache thì cho phép tải online
-                os.environ.pop("HF_HUB_OFFLINE", None)
-                from manga_ocr import MangaOcr
-                _manga_ocr_instance = MangaOcr()
+                # Ưu tiên load trực tiếp từ local snapshot (chỉ mất ~1s, không phụ thuộc mạng)
+                _manga_ocr_instance = RobustMangaOcr()
+            except Exception as local_err:
+                try:
+                    os.environ["HF_HUB_OFFLINE"] = "1"
+                    from manga_ocr import MangaOcr
+                    _manga_ocr_instance = MangaOcr()
+                except Exception:
+                    os.environ.pop("HF_HUB_OFFLINE", None)
+                    from manga_ocr import MangaOcr
+                    _manga_ocr_instance = MangaOcr()
             print("✓ Manga-OCR đã sẵn sàng!\n")
         return _manga_ocr_instance
 
@@ -434,7 +485,7 @@ def extract_bubbles_manga_ocr(orig_img, bubbles):
 def translate_with_google(text_list, target_lang="vi"):
     """
     Dịch danh sách các đoạn text qua Google Translate API (miễn phí, nhanh).
-    Ghép thành batch bằng ký tự newline để dịch 1 lần cho cả trang (~150ms).
+    Ưu tiên dùng endpoint clients5 (không bị lỗi 429 rate-limit) và fallback gtx.
     """
     if not text_list:
         return []
@@ -442,19 +493,41 @@ def translate_with_google(text_list, target_lang="vi"):
     if not any(t.strip() for t in text_list):
         return ["" for _ in text_list]
 
-    url = "https://translate.googleapis.com/translate_a/single"
     combined = "\n".join([t.replace("\r", " ").replace("\n", " ").strip() if t.strip() else "..." for t in text_list])
-    params = {
-        "client": "gtx",
-        "sl": "auto",
-        "tl": target_lang,
-        "dt": "t",
-        "q": combined
-    }
-
+    
+    # 1. Thử endpoint clients5 (Endpoint của tiện ích Chrome, không bị 429)
     try:
+        url_c5 = "https://clients5.google.com/translate_a/t"
+        params_c5 = {
+            "client": "dict-chrome-ex",
+            "sl": "auto",
+            "tl": target_lang,
+            "q": combined
+        }
         with httpx.Client(timeout=10.0) as client:
-            resp = client.get(url, params=params)
+            resp = client.get(url_c5, params=params_c5)
+            if resp.status_code == 200:
+                data = resp.json()
+                if isinstance(data, list) and len(data) > 0:
+                    raw_res = data[0][0] if isinstance(data[0], list) else data[0]
+                    lines = raw_res.split("\n")
+                    if len(lines) == len(text_list):
+                        return [l.strip() if l.strip() != "..." else "" for l in lines]
+    except Exception as e:
+        pass
+
+    # 2. Thử endpoint gtx (Cũ)
+    try:
+        url_gtx = "https://translate.googleapis.com/translate_a/single"
+        params_gtx = {
+            "client": "gtx",
+            "sl": "auto",
+            "tl": target_lang,
+            "dt": "t",
+            "q": combined
+        }
+        with httpx.Client(timeout=10.0) as client:
+            resp = client.get(url_gtx, params=params_gtx)
             if resp.status_code == 200:
                 data = resp.json()
                 full_translated = "".join([seg[0] for seg in data[0] if seg and seg[0]])
@@ -462,24 +535,28 @@ def translate_with_google(text_list, target_lang="vi"):
                 if len(lines) == len(text_list):
                     return [l.strip() if l.strip() != "..." else "" for l in lines]
     except Exception as e:
-        print(f"⚠️ Google Translate batch failed: {e}, fallback từng ô...")
+        pass
 
-    # Fallback từng đoạn text nếu batch bị lệch số dòng
+    # 3. Fallback dịch từng câu nếu batch thất bại
     results = []
     with httpx.Client(timeout=6.0) as client:
         for t in text_list:
             if not t.strip():
                 results.append("")
                 continue
+            translated_ok = False
+            # Thử qua clients5 trước
             try:
-                r = client.get(url, params={"client": "gtx", "sl": "auto", "tl": target_lang, "dt": "t", "q": t.strip()})
+                r = client.get("https://clients5.google.com/translate_a/t", params={"client": "dict-chrome-ex", "sl": "auto", "tl": target_lang, "q": t.strip()})
                 if r.status_code == 200:
                     d = r.json()
-                    trans = "".join([seg[0] for seg in d[0] if seg and seg[0]])
-                    results.append(trans.strip())
-                else:
-                    results.append(t.strip())
+                    res_text = d[0][0] if isinstance(d[0], list) else d[0]
+                    results.append(str(res_text).strip())
+                    translated_ok = True
             except Exception:
+                pass
+            
+            if not translated_ok:
                 results.append(t.strip())
     return results
 

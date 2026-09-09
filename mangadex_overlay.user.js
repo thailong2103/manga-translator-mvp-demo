@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MangaDex AI Translator Overlay (Tiếng Việt)
 // @namespace    https://github.com/vide-coding/mangadex-translator
-// @version      2.4.1
-// @description  Hiển thị bản dịch tiếng Việt đè lên bong bóng thoại MangaDex. Hỗ trợ 2 Pipeline linh hoạt (Manga-OCR Text và Multimodal Vision AI), dịch qua Google Translate hoặc LLM, chống nghẽn đơ tab 100%, tự co giãn theo tranh vẽ.
+// @version      2.5.0
+// @description  Hiển thị bản dịch tiếng Việt đè lên bong bóng thoại MangaDex. Hỗ trợ 2 Pipeline linh hoạt, Multi-Profile API Key & Custom Models không giới hạn, chống nghẽn đơ tab 100%, tự co giãn theo tranh vẽ.
 // @author       Antigravity & User
 // @match        https://mangadex.org/*
 // @icon         https://mangadex.org/favicon.ico
@@ -830,14 +830,10 @@
                             <div class="view-container hidden" id="settingsView">
                                 <div class="form-input-group">
                                     <div class="form-input-label">
-                                        <span>⚡ Presets nhanh:</span>
+                                        <span>⚡ Hồ sơ & Model AI (Profiles):</span>
                                     </div>
                                     <div class="presets-pills" id="presetsPills">
-                                        <button type="button" class="preset-pill active" data-preset="xkiro_qwen">xKiro Qwen</button>
-                                        <button type="button" class="preset-pill" data-preset="google_aistudio">Google AI Studio</button>
-                                        <button type="button" class="preset-pill" data-preset="xkiro_gemini">xKiro Gemini</button>
-                                        <button type="button" class="preset-pill" data-preset="openrouter">OpenRouter</button>
-                                        <button type="button" class="preset-pill" data-preset="custom">Tùy chỉnh</button>
+                                        <!-- Được render tự động từ config.profiles -->
                                     </div>
                                 </div>
 
@@ -1032,16 +1028,6 @@
             const saveCfgIcon = root.getElementById('saveCfgIcon');
             const saveCfgText = root.getElementById('saveCfgText');
             const cfgBadge = root.getElementById('cfgBadge');
-            const presetPills = root.querySelectorAll('.preset-pill');
-
-            const PRESETS = {
-                xkiro_qwen: { baseUrl: 'https://api.xkiro.com/v1', model: 'qwen/qwen3.5-flash:free' },
-                google_aistudio: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/', model: 'gemini-2.0-flash' },
-                xkiro_gemini: { baseUrl: 'https://api.xkiro.com/v1', model: 'google/gemini-2.5-flash' },
-                openrouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'google/gemini-2.0-flash-001' },
-                custom: {}
-            };
-
             const showView = (viewName) => {
                 if (viewName === 'settings') {
                     State.isSettingsView = true;
@@ -1075,21 +1061,6 @@
                 const isPass = cfgApiKey.type === 'password';
                 cfgApiKey.type = isPass ? 'text' : 'password';
                 btnEyeKey.textContent = isPass ? '🔒' : '👁️';
-            });
-
-            // Preset click
-            presetPills.forEach((pill) => {
-                pill.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    presetPills.forEach((p) => p.classList.remove('active'));
-                    pill.classList.add('active');
-                    const key = pill.getAttribute('data-preset');
-                    const p = PRESETS[key];
-                    if (p && p.baseUrl) {
-                        cfgBaseUrl.value = p.baseUrl;
-                        cfgModel.value = p.model;
-                    }
-                });
             });
 
             // Nút Kiểm Tra API
@@ -1161,11 +1132,13 @@
                     const saveRes = await apiRequest('/api/config', 'POST', {
                         base_url: baseUrl,
                         api_key: apiKey,
-                        model: model
+                        model: model,
+                        return_full: true
                     });
 
                     if (saveRes.ok) {
                         this.showSettingsBadge('success', '✅ Đã lưu cấu hình và đồng bộ với Server thành công!');
+                        this.loadSettingsForm();
                         setTimeout(() => {
                             showView('main');
                             this.hideSettingsBadge();
@@ -1191,7 +1164,7 @@
             const cfgBaseUrl = root.getElementById('cfgBaseUrl');
             const cfgModel = root.getElementById('cfgModel');
             const cfgApiKey = root.getElementById('cfgApiKey');
-            const presetPills = root.querySelectorAll('.preset-pill');
+            const presetsPills = root.getElementById('presetsPills');
 
             cfgServerUrl.value = CONFIG.SERVER_URL;
 
@@ -1202,22 +1175,51 @@
                     if (configData.model) cfgModel.value = configData.model;
                     if (configData.api_key) cfgApiKey.value = configData.api_key;
 
-                    const presets = {
-                        xkiro_qwen: { baseUrl: 'https://api.xkiro.com/v1', model: 'qwen/qwen3.5-flash:free' },
-                        google_aistudio: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/', model: 'gemini-2.0-flash' },
-                        xkiro_gemini: { baseUrl: 'https://api.xkiro.com/v1', model: 'google/gemini-2.5-flash' },
-                        openrouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'google/gemini-2.0-flash-001' }
-                    };
-                    let matched = 'custom';
-                    for (const [key, p] of Object.entries(presets)) {
-                        if (p.baseUrl === configData.base_url && p.model === configData.model) {
-                            matched = key;
-                            break;
+                    // Render dynamic profile pills
+                    if (presetsPills && configData.profiles) {
+                        presetsPills.replaceChildren();
+                        const activeId = configData.active_profile || 'xkiro_qwen';
+
+                        for (const [pid, prof] of Object.entries(configData.profiles)) {
+                            const pill = document.createElement('button');
+                            pill.type = 'button';
+                            pill.className = `preset-pill ${pid === activeId ? 'active' : ''}`;
+                            pill.setAttribute('data-profile-id', pid);
+                            const hasKeyIcon = (prof.has_key || Boolean(prof.api_key && prof.api_key.trim())) ? '🔑' : '⚠️';
+                            pill.textContent = `${prof.name || pid} ${hasKeyIcon}`;
+                            pill.title = `${prof.model || ''} (${prof.base_url || ''})`;
+
+                            pill.addEventListener('click', async (e) => {
+                                e.stopPropagation();
+                                presetsPills.querySelectorAll('.preset-pill').forEach(p => p.classList.remove('active'));
+                                pill.classList.add('active');
+
+                                try {
+                                    const switchRes = await apiRequest('/api/config', 'POST', {
+                                        action: 'switch_profile',
+                                        profile_id: pid,
+                                        return_full: true
+                                    });
+                                    if (switchRes && switchRes.ok && switchRes.config) {
+                                        const newProf = switchRes.config.profiles[pid];
+                                        if (newProf) {
+                                            cfgBaseUrl.value = newProf.base_url || '';
+                                            cfgModel.value = newProf.model || '';
+                                            cfgApiKey.value = newProf.api_key || '';
+                                        }
+                                        this.showSettingsBadge('success', `✅ Đã chuyển sang: ${prof.name}`);
+                                    }
+                                } catch (err) {
+                                    console.warn('[MangaOverlay] Lỗi chuyển profile:', err);
+                                    cfgBaseUrl.value = prof.base_url || '';
+                                    cfgModel.value = prof.model || '';
+                                    cfgApiKey.value = prof.api_key || '';
+                                }
+                            });
+
+                            presetsPills.appendChild(pill);
                         }
                     }
-                    presetPills.forEach((p) => {
-                        p.classList.toggle('active', p.getAttribute('data-preset') === matched);
-                    });
                 }
             } catch (err) {
                 console.warn('[MangaOverlay] Không thể lấy config từ server backend:', err);
