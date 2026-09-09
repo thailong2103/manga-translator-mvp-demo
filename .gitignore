@@ -30,3 +30,10 @@ config.json
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# File ghi chú cá nhân & Prompt tạm thời
+prompt_*.md
+prompt_*.txt
+*.prompt.md
+temp_*
+*_temp.*
