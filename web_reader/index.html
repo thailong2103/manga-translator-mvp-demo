@@ -3,173 +3,503 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manga Stream Reader — Bản Dịch Siêu Tốc</title>
-    <!-- Google Fonts -->
+    <title>MangaStream AI — Sổ Tay Dịch Truyện Tranh Đa Năng</title>
+    <!-- Google Fonts: Kalam (Felt-tip Marker) & Patrick Hand (Handwriting) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-theme">
-    <!-- Header / Control Navbar -->
-    <header id="main-header" class="glass-bar">
+<body>
+    <!-- ================================================================= -->
+    <!-- 1. UNIFIED SKETCHBOOK HEADER / NAVBAR                             -->
+    <!-- ================================================================= -->
+    <header id="main-header">
         <div class="header-left">
-            <div class="logo">
-                <span class="logo-icon">⚡</span>
-                <span class="logo-text">Manga<span class="highlight">Stream</span></span>
+            <a href="#reader" class="brand-logo" id="brand-link" title="MangaStream AI">
+                <svg class="sketch-icon" viewBox="0 0 24 24">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span class="logo-title">Manga<span class="red-mark">Stream</span></span>
+            </a>
+            
+            <div class="server-badge" title="Tăng tốc phần cứng DirectML GPU đang chạy">
+                <span class="status-dot"></span>
+                <span>DirectML Ready</span>
             </div>
+
+            <!-- Unified Navigation Tabs -->
+            <nav class="nav-tab-group" aria-label="Điều hướng chính">
+                <button type="button" id="tab-btn-reader" class="nav-tab active">
+                    <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <span>Trình Đọc</span>
+                </button>
+                <button type="button" id="tab-btn-settings" class="nav-tab">
+                    <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Cài Đặt</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Reader Controls (Visible when in Reader View) -->
+        <div class="header-center" id="reader-controls-center">
             <div class="chapter-picker-wrapper">
                 <select id="chapter-select" aria-label="Chọn tập truyện">
                     <option value="">Đang nạp danh sách tập...</option>
                 </select>
             </div>
-            <button id="btn-open-upload" class="action-btn upload-btn" title="Tải lên ảnh truyện từ máy">
-                <span class="btn-icon">📁</span>
-                <span class="btn-text">Thêm ảnh</span>
-            </button>
-        </div>
 
-        <div class="header-center">
             <div id="single-page-nav" class="page-nav-controls hidden">
-                <button id="btn-prev" class="nav-btn" title="Trang trước (Phím A hoặc ←)">‹</button>
+                <button id="btn-prev" class="nav-arrow-btn" title="Trang trước (A hoặc ←)">‹</button>
                 <span id="page-counter" class="page-indicator">Trang 1 / 1</span>
-                <button id="btn-next" class="nav-btn" title="Trang sau (Phím D hoặc →)">›</button>
+                <button id="btn-next" class="nav-arrow-btn" title="Trang sau (D hoặc →)">›</button>
             </div>
         </div>
 
         <div class="header-right">
-            <!-- Toggle Mode: Long Strip vs Single Page -->
-            <div class="mode-toggles">
-                <button id="mode-strip" class="mode-btn active" title="Chế độ cuộn dọc (Webtoon)">📜 Cuộn</button>
-                <button id="mode-single" class="mode-btn" title="Chế độ từng trang">📖 Từng trang</button>
-            </div>
-
-            <!-- Toggle Translation Overlay (Hotkey T) -->
-            <button id="btn-toggle-trans" class="pill-btn active" title="Ẩn/Hiện bản dịch (Phím T)">
-                <span class="pill-dot"></span>
-                <span id="trans-text-status">🇻🇳 Tiếng Việt</span>
+            <!-- Action Buttons -->
+            <button id="btn-open-upload" class="sketch-btn" title="Tải ảnh hoặc thư mục truyện từ máy tính">
+                <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                    <line x1="9" y1="14" x2="15" y2="14"></line>
+                </svg>
+                <span>Thêm Truyện</span>
             </button>
 
-            <!-- Settings Menu Trigger -->
-            <button id="btn-settings" class="icon-btn" title="Cài đặt">⚙️</button>
-            <button id="btn-fullscreen" class="icon-btn" title="Toàn màn hình (Phím F)">⛶</button>
+            <button id="btn-open-userscript" class="sketch-btn" title="Cài đặt Userscript cho MangaDex">
+                <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <span>MangaDex Script</span>
+            </button>
+
+            <!-- Reader Mode Switcher -->
+            <div class="reader-mode-switch" id="reader-mode-switch-group">
+                <button id="mode-strip" class="reader-mode-btn active" title="Cuộn dọc (Webtoon)">
+                    <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                        <path d="M12 3v14M8 13l4 4 4-4M5 21h14"></path>
+                    </svg>
+                    <span>Cuộn</span>
+                </button>
+                <button id="mode-single" class="reader-mode-btn" title="Lật từng trang">
+                    <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <span>Lật trang</span>
+                </button>
+            </div>
+
+            <!-- Translation Toggle Pill -->
+            <button id="btn-toggle-trans" class="trans-pill-btn active" title="Bật/Tắt chữ tiếng Việt (Phím T)">
+                <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span id="trans-text-status">Tiếng Việt</span>
+            </button>
+
+            <!-- Quick Display Settings Trigger -->
+            <button id="btn-quick-settings" class="sketch-btn" title="Chỉnh cỡ chữ & độ mờ bong bóng">
+                <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+            </button>
+            
+            <button id="btn-fullscreen" class="sketch-btn" title="Toàn màn hình (Phím F)">
+                <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+            </button>
         </div>
     </header>
 
-    <!-- Settings Dropdown Panel -->
-    <div id="settings-panel" class="settings-modal glass-panel hidden">
-        <div class="settings-header">
-            <h4>Cài Đặt Hiển Thị</h4>
-            <button id="btn-close-settings" class="close-btn">✕</button>
+    <!-- Quick Display Settings Popover (Reader view) -->
+    <div id="quick-settings-panel" class="quick-settings-popover hidden">
+        <div class="tape-strip"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h4 style="font-family: var(--font-marker); font-size: 18px;">Hiển Thị Bong Bóng</h4>
+            <button id="btn-close-quick-settings" class="close-btn" style="width: 26px; height: 26px;">✕</button>
         </div>
-        <div class="settings-body">
-            <div class="setting-item">
-                <label for="slider-opacity">Độ mờ nền bong bóng thoại:</label>
-                <input type="range" id="slider-opacity" min="60" max="100" value="96">
-                <span id="val-opacity">96%</span>
-            </div>
-            <div class="setting-item">
-                <label for="slider-scale">Kích cỡ font chữ:</label>
-                <input type="range" id="slider-scale" min="80" max="140" value="100">
-                <span id="val-scale">100%</span>
-            </div>
-            <div class="setting-item shortcuts-guide">
-                <h5>Phím tắt tiện lợi:</h5>
-                <ul>
-                    <li><kbd>T</kbd>: Bật/Tắt đè chữ tiếng Việt (xem bản scan gốc)</li>
-                    <li><kbd>A</kbd> / <kbd>←</kbd>: Lùi về trang trước</li>
-                    <li><kbd>D</kbd> / <kbd>→</kbd>: Tiến tới trang sau</li>
-                    <li><kbd>F</kbd>: Bật/Tắt toàn màn hình</li>
-                </ul>
-            </div>
+        <div class="form-group">
+            <label for="slider-opacity" class="form-label" style="font-size: 15px;">Độ mờ nền khung thoại: <span id="val-opacity">96%</span></label>
+            <input type="range" id="slider-opacity" min="50" max="100" value="96" style="width: 100%;">
+        </div>
+        <div class="form-group">
+            <label for="slider-scale" class="form-label" style="font-size: 15px;">Tỉ lệ cỡ chữ: <span id="val-scale">100%</span></label>
+            <input type="range" id="slider-scale" min="80" max="140" value="100" style="width: 100%;">
+        </div>
+        <div style="background: var(--paper-muted); padding: 10px; border-radius: var(--wobbly-sm); font-size: 14px; border: 1.5px dashed var(--border-pencil);">
+            <strong>Phím tắt nhanh:</strong><br>
+            • <kbd>T</kbd>: Bật/Tắt bản dịch<br>
+            • <kbd>A</kbd> / <kbd>D</kbd>: Lùi / Tiến trang<br>
+            • <kbd>F</kbd>: Toàn màn hình
         </div>
     </div>
 
-    <!-- Main Reader Viewport -->
-    <main id="reader-viewport" class="reader-container strip-mode">
-        <!-- Các trang truyện sẽ được render động bởi app.js vào đây -->
-        <div id="loading-spinner" class="loading-state">
-            <div class="spinner"></div>
-            <p>Đang nạp truyện tranh & bản dịch siêu tốc...</p>
-        </div>
-    </main>
+    <!-- ================================================================= -->
+    <!-- 2. VIEW 1: MANGA STREAM READER VIEW                               -->
+    <!-- ================================================================= -->
+    <section id="view-reader" class="view-container active">
+        <main id="reader-viewport" class="strip-mode">
+            <div id="loading-spinner" class="loading-state">
+                <div class="sketch-spinner"></div>
+                <h3 style="font-family: var(--font-marker); margin-bottom: 6px;">Đang nạp truyện tranh...</h3>
+                <p>Đang đồng bộ tọa độ khung thoại và bản dịch từ máy chủ cục bộ.</p>
+            </div>
+        </main>
+    </section>
 
-    <!-- Full-screen Drag & Drop Visual Overlay -->
-    <div id="drag-drop-overlay" class="drag-drop-overlay hidden">
-        <div class="drag-drop-content">
-            <div class="drop-icon">📥</div>
-            <h3>Thả file ảnh hoặc thư mục vào đây</h3>
-            <p>Tự động nhận diện các định dạng JPG, PNG, WEBP</p>
-        </div>
-    </div>
+    <!-- ================================================================= -->
+    <!-- 3. VIEW 2: UNIFIED SETTINGS CONTROL PANEL                         -->
+    <!-- ================================================================= -->
+    <section id="view-settings" class="view-container">
+        <div class="settings-wrapper">
+            <!-- Header Note Card -->
+            <div class="settings-header-card">
+                <div class="thumbtack"></div>
+                <h2 class="title">Cài Đặt Mô Hình & API</h2>
+                <p class="subtitle">Tùy chỉnh Engine bóc chữ (OCR), Nhà cung cấp dịch thuật (Google Translate / LLM), và quản lý hồ sơ cấu hình.</p>
+            </div>
 
+            <!-- Profile Management Card -->
+            <div class="sketch-card">
+                <div class="tape-strip left"></div>
+                <h3 class="section-label">
+                    <svg class="sketch-icon" viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                        <line x1="7" y1="8" x2="17" y2="8"></line>
+                        <line x1="7" y1="12" x2="13" y2="12"></line>
+                    </svg>
+                    <span class="marker-underline">Hồ Sơ Cấu Hình (Profiles)</span>
+                </h3>
+                <div class="profile-bar">
+                    <div class="profile-select-wrapper">
+                        <select id="profile-select" class="sketch-select" aria-label="Chọn hồ sơ">
+                            <option value="default">Mặc định (Google Translate Miễn Phí)</option>
+                        </select>
+                    </div>
+                    <button type="button" id="btn-new-profile" class="sketch-btn">
+                        <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Thêm Mới</span>
+                    </button>
+                    <button type="button" id="btn-delete-profile" class="sketch-btn" style="color: var(--marker-red);" title="Xóa hồ sơ hiện tại">
+                        <svg class="sketch-icon sm" viewBox="0 0 24 24" style="stroke: var(--marker-red);">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span>Xóa</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pipeline Selection Card -->
+            <div class="sketch-card">
+                <div class="tape-strip right"></div>
+                <h3 class="section-label">
+                    <svg class="sketch-icon" viewBox="0 0 24 24">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    <span class="marker-underline">Phương Pháp Xử Lý (Pipeline)</span>
+                </h3>
+                <div class="grid-2">
+                    <div id="card-pipeline-ocr" class="selectable-box active">
+                        <div class="box-title">OCR + Dịch Thuật</div>
+                        <p class="box-desc">Tách chữ bằng Manga-OCR / RapidOCR rồi dịch qua Google (~150ms) hoặc LLM Text. Siêu tốc và tiết kiệm token 95%!</p>
+                    </div>
+                    <div id="card-pipeline-vision" class="selectable-box">
+                        <div class="box-title">Ảnh + Multimodal Vision</div>
+                        <p class="box-desc">Đánh số bong bóng [1], [2] lên tranh và gửi thẳng cho Vision LLM (Gemini, Qwen VL). Dịch bám sát biểu cảm nhân vật.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OCR Engines & Smart Auto-Detect Card (For OCR+Trans Pipeline) -->
+            <div class="sketch-card" id="section-ocr-engine">
+                <h3 class="section-label">
+                    <svg class="sketch-icon" viewBox="0 0 24 24">
+                        <path d="M4 7V4h3M17 4h3v3M4 17v3h3M17 20h3v-3M7 12h10"></path>
+                    </svg>
+                    <span class="marker-underline">Mô Hình Bóc Chữ (OCR Engines Torchless)</span>
+                </h3>
+                <div class="grid-3">
+                    <div id="card-ocr-manga" class="selectable-box active">
+                        <div class="box-title">Manga-OCR (Tiếng Nhật)</div>
+                        <p class="box-desc">Chuyên bóc chữ Manga Nhật Bản gốc (Kanji, Furigana, đọc dọc/ngang).</p>
+                    </div>
+                    <div id="card-ocr-rapid-en" class="selectable-box">
+                        <div class="box-title">RapidOCR (Tiếng Anh)</div>
+                        <p class="box-desc">Chuyên bóc font Comic cách điệu, bảo toàn dấu cách cho bản scan tiếng Anh.</p>
+                    </div>
+                    <div id="card-ocr-rapid-ch" class="selectable-box">
+                        <div class="box-title">RapidOCR (Tiếng Trung)</div>
+                        <p class="box-desc">Chuyên bóc chữ Hán Giản thể & Phồn thể cho Manhua Trung Quốc.</p>
+                    </div>
+                </div>
+
+                <!-- Auto-detect Toggle -->
+                <div class="switch-container">
+                    <div class="switch-label-group">
+                        <div class="switch-title">Tự động nhận diện ngôn ngữ chương truyện</div>
+                        <div class="switch-desc">Tự động chọn Manga-OCR (nếu truyện Nhật) hoặc RapidOCR (nếu truyện Anh/Trung). Bạn có thể tắt nếu muốn cố định một model.</div>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="switch-auto-detect" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Translation Provider Selection (Google vs LLM Text vs Raw) -->
+            <div class="sketch-card" id="section-translation-provider">
+                <h3 class="section-label">
+                    <svg class="sketch-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    <span class="marker-underline">Bộ Dịch Thuật (Translation Engine)</span>
+                </h3>
+                <div class="grid-3">
+                    <div id="card-provider-google" class="selectable-box active">
+                        <div class="box-title">Google Dịch (Free)</div>
+                        <p class="box-desc">Miễn phí 100%, không cần API Key, phản hồi tức thì ~150ms/trang.</p>
+                    </div>
+                    <div id="card-provider-llm" class="selectable-box">
+                        <div class="box-title">LLM Text (API Key)</div>
+                        <p class="box-desc">Dịch qua Qwen, Gemini, Claude, GPT-4o. Văn phong truyện tranh mượt mà.</p>
+                    </div>
+                    <div id="card-provider-raw" class="selectable-box">
+                        <div class="box-title">Giữ Chữ Gốc (Raw OCR)</div>
+                        <p class="box-desc">Chỉ bóc chữ gốc không dịch, thích hợp học ngoại ngữ hoặc tra từ.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Configuration Form -->
+            <div class="sketch-card" id="section-api-credentials">
+                <h3 class="section-label">
+                    <svg class="sketch-icon" viewBox="0 0 24 24">
+                        <path d="M21 2l-2 2m-1.5 1.5L14 9l-3-3-9 9 3 3 9-9 3 3 3.5-3.5"></path>
+                        <circle cx="7.5" cy="16.5" r="1.5"></circle>
+                    </svg>
+                    <span class="marker-underline">Thông Tin API Key & Máy Chủ LLM</span>
+                </h3>
+
+                <!-- Quick Presets -->
+                <div class="form-group">
+                    <label class="form-label">Chọn nhà cung cấp mẫu:</label>
+                    <select id="select-provider-preset" class="sketch-select">
+                        <option value="custom">-- Tự cấu hình thủ công --</option>
+                        <option value="xkiro">xKiro API (Khuyên dùng - Qwen 3.5 Flash)</option>
+                        <option value="gemini">Google Gemini (Google AI Studio)</option>
+                        <option value="openrouter">OpenRouter (Claude, Qwen, DeepSeek)</option>
+                        <option value="groq">Groq Cloud (Llama 3, Mixtral)</option>
+                        <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+                        <option value="ollama">Ollama Cục Bộ (Local http://localhost:11434/v1)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-api-key" class="form-label">API Key:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="password" id="input-api-key" class="sketch-input" placeholder="Dán khóa API của bạn vào đây (vd: sk-...)" autocomplete="off">
+                        <button type="button" id="btn-toggle-key" class="sketch-btn" title="Hiện/Ẩn Key">
+                            <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-base-url" class="form-label">Base URL (Endpoint tương thích OpenAI):</label>
+                    <input type="text" id="input-base-url" class="sketch-input" placeholder="https://api.xkiro.com/v1">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="input-model" class="form-label">Tên Mô Hình (Model Name):</label>
+                        <input type="text" id="input-model" class="sketch-input" placeholder="qwen/qwen3.5-flash:free">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-workers" class="form-label">Số luồng xử lý song song:</label>
+                        <input type="number" id="input-workers" class="sketch-input" min="1" max="20" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="settings-actions">
+                <button type="button" id="btn-test-api" class="sketch-btn">
+                    <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Kiểm Tra Kết Nối</span>
+                </button>
+                <button type="button" id="btn-save-settings" class="sketch-btn primary">
+                    <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span>Lưu Cấu Hình Ngay</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 4. MODALS: UPLOAD MANGA & USERSCRIPT GUIDE                         -->
+    <!-- ================================================================= -->
     <!-- Upload Manga Modal -->
     <div id="upload-modal" class="modal-backdrop hidden">
-        <div class="modal-card glass-panel">
+        <div class="modal-card">
+            <div class="tape-strip"></div>
             <div class="modal-header">
-                <div class="modal-title">
-                    <span class="modal-icon">📁</span>
-                    <h3>Thêm Truyện Tranh Từ Máy Tính</h3>
-                </div>
+                <h3 class="modal-title">Thêm Truyện Tranh Từ Máy Tính</h3>
                 <button id="btn-close-upload" class="close-btn" title="Đóng">✕</button>
             </div>
             <div class="modal-body">
-                <!-- Dropzone Area -->
                 <div id="modal-dropzone" class="dropzone-area">
-                    <div class="dropzone-icon">🖼️</div>
-                    <div class="dropzone-text">
-                        <strong>Kéo thả các file ảnh hoặc thư mục vào đây</strong>
-                        <span>hoặc chọn qua các nút bên dưới</span>
+                    <div class="dropzone-icon" style="margin-bottom: 12px;">
+                        <svg class="sketch-icon lg" viewBox="0 0 24 24" style="width: 48px; height: 48px; stroke-width: 2;">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
                     </div>
-                    <div class="dropzone-actions">
-                        <label class="btn-file-select">
-                            <span>📄 Chọn nhiều file ảnh</span>
-                            <input type="file" id="input-files" multiple accept="image/png, image/jpeg, image/webp" class="hidden-input">
+                    <h4 style="font-family: var(--font-marker); font-size: 20px; margin-bottom: 6px;">Kéo thả ảnh hoặc thư mục vào đây</h4>
+                    <p style="color: #666; font-size: 15px; margin-bottom: 16px;">Tự động nhận diện JPG, PNG, WEBP và sắp xếp theo số thứ tự trang.</p>
+                    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                        <label class="sketch-btn" style="cursor: pointer;">
+                            <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <span>Chọn nhiều file ảnh</span>
+                            <input type="file" id="input-files" multiple accept="image/png, image/jpeg, image/webp" class="hidden">
                         </label>
-                        <label class="btn-file-select secondary">
-                            <span>📁 Chọn cả thư mục</span>
-                            <input type="file" id="input-folder" webkitdirectory directory class="hidden-input">
+                        <label class="sketch-btn secondary" style="cursor: pointer;">
+                            <svg class="sketch-icon sm" viewBox="0 0 24 24">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>Chọn cả thư mục</span>
+                            <input type="file" id="input-folder" webkitdirectory directory class="hidden">
                         </label>
                     </div>
                 </div>
 
-                <!-- Chapter Metadata Form -->
                 <div class="form-group">
-                    <label for="input-chapter-title">Tên tập truyện / chương:</label>
-                    <input type="text" id="input-chapter-title" placeholder="VD: One Piece Chương 1000" class="text-input">
+                    <label for="input-chapter-title" class="form-label">Tên tập truyện / chương:</label>
+                    <input type="text" id="input-chapter-title" class="sketch-input" placeholder="VD: One Piece Chương 1000">
                 </div>
 
-                <!-- Selected Files Preview List -->
-                <div id="upload-preview-container" class="preview-container hidden">
-                    <div class="preview-header">
-                        <span id="preview-count">0 ảnh đã chọn</span>
-                        <button type="button" id="btn-clear-files" class="text-btn">Xóa tất cả</button>
+                <div id="upload-preview-container" class="hidden">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span id="preview-count" style="font-weight: bold;">0 ảnh đã chọn</span>
+                        <button type="button" id="btn-clear-files" style="background: none; border: none; color: var(--marker-red); cursor: pointer; font-weight: bold;">Xóa tất cả</button>
                     </div>
                     <div id="preview-list" class="preview-list"></div>
                 </div>
 
-                <!-- Upload Progress & Status -->
-                <div id="upload-progress-container" class="upload-progress-container hidden">
-                    <div class="progress-info">
+                <div id="upload-progress-container" class="hidden" style="margin-top: 14px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px;">
                         <span id="upload-status-text">Đang tải lên...</span>
                         <span id="upload-percentage">0%</span>
                     </div>
-                    <div class="progress-track">
-                        <div id="upload-progress-bar" class="progress-bar-fill"></div>
+                    <div style="background: var(--paper-muted); border: 2px solid var(--border-pencil); border-radius: 10px; height: 16px; overflow: hidden;">
+                        <div id="upload-progress-bar" style="background: var(--marker-red); height: 100%; width: 0%; transition: width 0.2s;"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button id="btn-cancel-upload" class="modal-btn secondary">Hủy bỏ</button>
-                <button id="btn-start-upload" class="modal-btn primary" disabled>
-                    <span class="btn-spinner hidden" id="upload-spinner"></span>
-                    <span id="btn-start-upload-text">🚀 Bắt đầu dịch</span>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button id="btn-cancel-upload" class="sketch-btn">Hủy bỏ</button>
+                <button id="btn-start-upload" class="sketch-btn primary" disabled>
+                    <span id="upload-spinner" class="sketch-spinner hidden" style="width: 16px; height: 16px; border-width: 2px; margin: 0 4px 0 0;"></span>
+                    <span id="btn-start-upload-text">Bắt Đầu Dịch</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Script điều khiển -->
+    <!-- Userscript Installation Modal -->
+    <div id="userscript-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="thumbtack"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">Cài Đặt Userscript MangaDex</h3>
+                <button id="btn-close-userscript" class="close-btn" title="Đóng">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="postit-note">
+                    <strong>Đọc truyện trực tiếp trên website MangaDex:</strong> Bản dịch tiếng Việt sẽ tự động đè khít lên bong bóng thoại ngay khi bạn đọc từng trang.
+                </div>
+
+                <h4 style="font-family: var(--font-marker); margin-bottom: 8px;">Quy trình cài đặt nhanh:</h4>
+                <ol style="padding-left: 24px; margin-bottom: 20px; line-height: 1.6;">
+                    <li>Cài đặt tiện ích mở rộng <strong>Tampermonkey</strong> trên trình duyệt của bạn (Chrome, Edge, Firefox, Brave).</li>
+                    <li>Nhấp vào liên kết cài đặt trực tiếp bên dưới:
+                        <div style="margin: 12px 0;">
+                            <a href="/mangadex_overlay.user.js" target="_blank" class="sketch-btn primary" style="font-size: 19px;">
+                                <svg class="sketch-icon" viewBox="0 0 24 24" style="stroke: #ffffff;">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                                <span>Cài Đặt Userscript (1-Click)</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li>Tampermonkey sẽ tự động mở tab xác nhận ➔ Bấm <strong>Install (Cài đặt)</strong> là hoàn tất.</li>
+                    <li>Truy cập bất kỳ truyện nào trên MangaDex (ví dụ: <code>mangadex.org/chapter/...</code>), thanh điều khiển sẽ tự động xuất hiện.</li>
+                </ol>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button id="btn-done-userscript" class="sketch-btn">Đã Hiểu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Drag & Drop Visual Overlay -->
+    <div id="drag-drop-overlay" class="drag-drop-overlay hidden">
+        <div style="background: var(--paper-white); border: 4px solid var(--border-pencil); border-radius: var(--wobbly-md); padding: 40px; box-shadow: var(--shadow-xl);">
+            <div style="margin-bottom: 12px;">
+                <svg class="sketch-icon lg" viewBox="0 0 24 24" style="width: 64px; height: 64px; stroke: var(--marker-red); stroke-width: 2;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </div>
+            <h2 style="font-family: var(--font-marker); font-size: 28px; margin-bottom: 8px;">Thả ảnh hoặc thư mục truyện vào đây</h2>
+            <p>Hệ thống sẽ tự động mở hộp thoại tải lên và tiến hành dịch siêu tốc.</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-notification" class="toast-msg"></div>
+
+    <!-- JavaScript Controller -->
     <script src="app.js"></script>
 </body>
 </html>

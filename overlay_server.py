@@ -230,12 +230,11 @@ class MangaOverlayHandler(BaseHTTPRequestHandler):
 
         # 6. Phục vụ file tĩnh của Local Web Reader từ thư mục web_reader/
         static_path = path.lstrip("/")
-        if not static_path or static_path == "reader":
+        if not static_path or static_path in ("reader", "settings", "settings.html"):
             static_path = "index.html"
-        elif static_path == "settings":
-            static_path = "settings.html"
         elif static_path.startswith("web_reader/"):
-            static_path = static_path[len("web_reader/"):]
+            sub = static_path[len("web_reader/"):]
+            static_path = "index.html" if sub in ("settings.html", "index.html") else sub
 
         web_reader_dir = os.path.join(SCRIPT_DIR, "web_reader")
         file_to_serve = os.path.join(web_reader_dir, static_path)

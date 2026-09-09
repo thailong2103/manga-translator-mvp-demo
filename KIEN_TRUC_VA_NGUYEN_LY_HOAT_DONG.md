@@ -1,16 +1,16 @@
-# Kiến Trúc Hệ Thống & Nguyên Lý Hoạt Động (Manga Translator AI)
+# Kiến Trúc Hệ Thống & Nguyên Lý Hoạt Động
 
-Tài liệu này trình bày chi tiết về cấu trúc kỹ thuật, logic giải thuật, luồng xử lý dữ liệu và cách hoạt động của từng **Engine** và **Chức năng** trong hệ thống **Manga Translator AI**.
+> **Tài liệu kỹ thuật trình bày cấu trúc kiến trúc, giải thuật, luồng dữ liệu và nguyên lý vận hành của từng thành phần trong hệ thống MangaStream AI.**
 
 ---
 
-## 📑 Mục Lục
+## Mục Lục
 1. [Tổng Quan Kiến Trúc Tổng Thể](#1-tổng-quan-kiến-trúc-tổng-thể)
 2. [Chi Tiết Các Engine AI & Xử Lý Dữ Liệu](#2-chi-tiết-các-engine-ai--xử-lý-dữ-liệu)
    - [Engine 1: Comic-Text-Detector (Định vị khung thoại)](#engine-1-comic-text-detector-định-vị-khung-thoại)
-   - [Engine 2: Manga-OCR ONNX (Bóc tách chữ tiếng Nhật)](#engine-2-manga-ocr-onnx-bóc-tách-chữ-tiếng-nhật)
+   - [Engine 2: Multi-Engine OCR Torchless (Nhận diện chữ Nhật - Anh - Trung)](#engine-2-multi-engine-ocr-torchless-nhận-diện-chữ-nhật---anh---trung)
    - [Engine 3: Google Translate Batch Stream (Dịch siêu tốc)](#engine-3-google-translate-batch-stream-dịch-siêu-tốc)
-   - [Engine 4: LLM Text-Only Translator (Dịch ngữ cảnh đối thoại)](#engine-4-llm-text-only-translator-dịch-ngữ-cảnh-đối-thoại)
+   - [Engine 4: LLM Text-Only Translator (Dịch theo ngữ cảnh hội thoại)](#engine-4-llm-text-only-translator-dịch-theo-ngữ-cảnh-hội-thoại)
    - [Engine 5: Multimodal Vision LLM Translator (Dịch theo ngữ cảnh tranh)](#engine-5-multimodal-vision-llm-translator-dịch-theo-ngữ-cảnh-tranh)
 3. [Luồng Xử Lý Băng Chuyền Streaming (Pipeline Logic)](#3-luồng-xử-lý-băng-chuyền-streaming-pipeline-logic)
 4. [Engine Hiển Thị: MangaDex Overlay Userscript](#4-engine-hiển-thị-mangadex-overlay-userscript)
@@ -54,15 +54,15 @@ Hệ thống hoạt động theo mô hình **Client-Server cục bộ (Local Dec
 │  │ PIPELINE A: OCR + DỊCH        │                             │ PIPELINE B: VISION│  │
 │  │ (Tiết kiệm token, siêu tốc)   │                             │ (Multimodal LLM)  │  │
 │  │                               │                             │                   │  │
-│  │ 3. Manga-OCR ONNX             │                             │ 3. Set-of-Mark    │  │
-│  │    - Cắt box ảnh (PIL)        │                             │    - Đánh số [1], │  │
-│  │    - Vision Transformer + BPE │                             │      [2] lên ảnh  │  │
-│  │    - Trích xuất chữ Nhật gốc  │                             │                   │  │
+│  │ 3. Multi-Engine OCR Torchless │                             │ 3. Set-of-Mark    │  │
+│  │    ├─ Manga-OCR (Tiếng Nhật)  │                             │    - Đánh số [1], │  │
+│  │    ├─ RapidOCR (Tiếng Anh)    │                             │      [2] lên ảnh  │  │
+│  │    └─ RapidOCR (Tiếng Trung)  │                             │                   │  │
 │  │                               │                             │ 4. Vision API     │  │
 │  │ 4. Bộ Dịch Lựa Chọn:          │                             │    - Qwen 3.5 /   │  │
-│  │    ├─► Google Translate (~150ms)                            │      Gemini Flash │  │
-│  │    ├─► LLM Text-only Prompt   │                             │    - Dịch theo ảnh│  │
-│  │    └─► Raw (Giữ tiếng Nhật)   │                             └─────────┬─────────┘  │
+│  │    ├─ Google Translate        │                             │      Gemini Flash │  │
+│  │    ├─ LLM Text-only Prompt    │                             │    - Dịch theo ảnh│  │
+│  │    └─ Raw (Giữ nguyên gốc)    │                             └─────────┬─────────┘  │
 │  └──────────────┬────────────────┘                                       │            │
 │                 │                                                        │            │
 │                 └─────────────────────────┬──────────────────────────────┘            │
@@ -84,8 +84,8 @@ Hệ thống hoạt động theo mô hình **Client-Server cục bộ (Local Dec
 * **Nguồn gốc:** Mô hình mạng nơ-ron tích chập (CNN) được huấn luyện chuyên biệt trên hàng chục nghìn trang manga/comic để phát hiện chính xác mọi hình dạng bóng thoại (tròn, bầu dục, chữ nhật, gai nhọn, thoại không viền).
 * **Tăng tốc phần cứng (Hardware Acceleration):**
   - Sử dụng `onnxruntime-directml` với ưu tiên `['DmlExecutionProvider', 'CPUExecutionProvider']`.
-  - Chạy trực tiếp trên GPU AMD Radeon 780M / 680M tích hợp, GPU rời NVIDIA GeForce / AMD Radeon hoặc Intel Iris Xe thông qua DirectX 12.
-  - Tốc độ xử lý: **~120ms – 170ms** cho một trang truyện độ phân giải 2K.
+  - Chạy trực tiếp trên GPU AMD Radeon, NVIDIA GeForce hoặc Intel Iris Xe thông qua DirectX 12.
+  - Thời gian xử lý: **~120ms – 170ms** cho một trang truyện độ phân giải 2K.
 * **Nguyên lý tiền xử lý (Preprocessing):**
   1. Giữ nguyên tỷ lệ khung hình (Aspect Ratio): Tính tỷ lệ scale = 1024 / max(h, w).
   2. Resize ảnh về kích thước chuẩn và đắp viền đen (Zero-padding) thành hình vuông chuẩn `1024 x 1024 x 3`.
@@ -94,11 +94,11 @@ Hệ thống hoạt động theo mô hình **Client-Server cục bộ (Local Dec
   1. Lấy ma trận xác suất bóng thoại và văn bản từ output của ONNX.
   2. Áp dụng ngưỡng nhị phân (Thresholding) và thuật toán tìm đường bao `cv2.findContours`.
   3. Quy đổi ngược tọa độ từ ảnh vuông 1024x1024 về độ phân giải gốc của ảnh manga.
-  4. Mở rộng biên (Padding Expansion) 5% về mỗi phía để tránh cắt cụt dấu câu hoặc mép chữ tiếng Nhật.
+  4. Mở rộng biên (Padding Expansion) 5% về mỗi phía để tránh cắt cụt dấu câu hoặc mép chữ.
 
 ---
 
-### Engine 2: Multi-Engine OCR Torchless (Bóc tách chữ đa ngôn ngữ Nhật - Anh - Trung)
+### Engine 2: Multi-Engine OCR Torchless (Nhận diện chữ Nhật - Anh - Trung)
 
 Hệ thống hỗ trợ 3 mô hình OCR cục bộ chạy hoàn toàn không cần PyTorch (Torchless), sử dụng trực tiếp `onnxruntime-directml`:
 
@@ -118,8 +118,8 @@ Hệ thống hỗ trợ 3 mô hình OCR cục bộ chạy hoàn toàn không c�
    * **Thế mạnh:** Bóc tách trọn vẹn câu thoại trong Manhua Trung Quốc, loại bỏ khoảng cách thừa.
 
 * **Cơ chế Tự Động Nhận Diện & Ghi Đè Thủ Công (Auto-detect & Manual Override):**
-  - **Tự động nhận diện (Auto-detect)**: Khi người dùng mở một chapter trên MangaDex, frontend đọc thuộc tính `translatedLanguage` (`ja`, `en`, `zh`, ...). Hệ thống tự động kích hoạt Engine OCR tương ứng (`ja` ➔ Manga-OCR, `zh` ➔ RapidOCR Trung, `en`/khác ➔ RapidOCR Anh).
-  - **Tính năng loại trừ nhãn sai (Manual Override)**: Khi người dùng bấm chọn thủ công một Engine OCR trên thanh menu, hệ thống sẽ **khóa cứng (Lock)** lựa chọn đó cho chapter hiện tại, ngăn thuật toán tự động can thiệp (hữu ích khi uploader trên MangaDex gắn nhầm cờ ngôn ngữ). Người dùng có thể nhấn `↺ Auto` để khôi phục bất kỳ lúc nào.
+  - **Tự động nhận diện (Auto-detect)**: Khi người dùng mở một chapter trên MangaDex, frontend đọc thuộc tính `translatedLanguage` (`ja`, `en`, `zh`, ...). Hệ thống tự động kích hoạt Engine OCR tương ứng (`ja` sang Manga-OCR, `zh` sang RapidOCR Trung, `en`/khác sang RapidOCR Anh).
+  - **Tính năng loại trừ nhãn sai (Manual Override)**: Khi người dùng bấm chọn thủ công một Engine OCR trên thanh menu, hệ thống sẽ **khóa cứng (Lock)** lựa chọn đó cho chapter hiện tại, ngăn thuật toán tự động can thiệp (hữu ích khi uploader trên MangaDex gắn nhầm cờ ngôn ngữ). Người dùng có thể nhấn `Auto` để khôi phục bất kỳ lúc nào.
 
 ---
 
@@ -134,9 +134,9 @@ Hệ thống hỗ trợ 3 mô hình OCR cục bộ chạy hoàn toàn không c�
 
 ---
 
-### Engine 4: LLM Text-Only Translator (Dịch ngữ cảnh đối thoại)
-* **Mục đích:** Dành cho người đọc muốn chất lượng dịch văn học cao cấp, hiểu ngữ cảnh nhân vật và giữ được sự hài hước, văn phong kiếm hiệp, tình cảm của manga.
-* **Tối ưu hóa Token:** Thay vì gửi ảnh lớn chiếm 1,000 – 3,000 token/trang, chế độ này chỉ gửi text thuần đã bóc tách từ Manga-OCR:
+### Engine 4: LLM Text-Only Translator (Dịch theo ngữ cảnh hội thoại)
+* **Mục đích:** Dành cho người đọc muốn chất lượng dịch văn học cao cấp, hiểu ngữ cảnh nhân vật và giữ được sự tự nhiên của câu thoại.
+* **Tối ưu hóa Token:** Thay vì gửi ảnh lớn chiếm 1,000 – 3,000 token/trang, chế độ này chỉ gửi text thuần đã bóc tách từ Manga-OCR / RapidOCR:
   ```json
   [
     {"id": 1, "text": "お前… 本当にそれでいいのか？"},
@@ -158,7 +158,7 @@ Hệ thống hỗ trợ 3 mô hình OCR cục bộ chạy hoàn toàn không c�
 
 ## 3. Luồng Xử Lý Băng Chuyền Streaming (Pipeline Logic)
 
-Điểm cốt lõi giúp hệ thống đạt danh hiệu **Siêu Tốc** là kiến trúc **Băng Chuyền Độc Lập (Pipelined Dispatch)**:
+Điểm cốt lõi giúp hệ thống đạt hiệu năng cao là kiến trúc **Băng Chuyền Độc Lập (Pipelined Dispatch)**:
 
 ```
 Thời gian ──►  0s           1s           2s           3s           4s           5s
@@ -176,7 +176,7 @@ Trang 3:                                 [Tải ảnh] ──► [Detect] ─►
 
 ## 4. Engine Hiển Thị: MangaDex Overlay Userscript
 
-File: `mangadex_overlay.user.js` (Phiên bản v2.3.0)
+File: `mangadex_overlay.user.js`
 
 ### 1. Cơ Chế Bắt DOM Động & Không Nghẽn Tab (Non-blocking MutationObserver)
 - MangaDex là ứng dụng đơn trang (SPA) xây dựng bằng Vue/Nuxt, các phần tử ảnh liên tục được tải động (Lazy loading) khi cuộn trang.
@@ -191,7 +191,7 @@ File: `mangadex_overlay.user.js` (Phiên bản v2.3.0)
   - `scale_y = img.clientHeight / original_height`
   - `left = orig_x * scale_x + img.offsetLeft`
   - `top = orig_y * scale_y + img.offsetTop`
-- Đảm bảo bong bóng thoại dịch luôn nằm **khít 100%** đè lên bóng thoại gốc dù người dùng phóng to, thu nhỏ hay xoay màn hình.
+- Đảm bảo bong bóng thoại dịch luôn nằm khít đè lên bóng thoại gốc dù người dùng phóng to, thu nhỏ hay xoay màn hình.
 
 ### 3. Tự Động Điều Chỉnh Kích Thước Chữ (Auto Font Fitting)
 - Dựa trên diện tích của hộp thoại `w * h` và độ dài của câu văn bản tiếng Việt.
@@ -201,37 +201,39 @@ File: `mangadex_overlay.user.js` (Phiên bản v2.3.0)
 
 ## 5. Giao Diện Local Web Reader & Quản Lý Cấu Hình
 
-### Local Web Reader (`web_reader/`)
-- Cung cấp giải pháp cho người dùng đọc các bộ truyện tải về máy tính (file `.zip`, `.cbz` giải nén hoặc folder ảnh).
-- Hỗ trợ kéo thả cả thư mục vào trình duyệt qua HTML5 `webkitdirectory`.
-- Tự động sắp xếp tên file theo thứ tự tự nhiên (Natural Sort: `page_1`, `page_2`, `page_10` thay vì `page_1`, `page_10`, `page_2`).
-- 2 chế độ đọc:
-  - **Cuộn dọc (Webtoon):** Đọc mượt mà từ trên xuống dưới, hỗ trợ lazy-load.
-  - **Lật trang (Single Page):** Lật từng trang như sách với phím mũi tên `←` / `→`.
+### 1. Kiến Trúc SPA Hợp Nhất (Unified Single-Page Application)
+- Thay vì tách rời thành 2 trang độc lập gây mất trạng thái đọc, hệ thống tích hợp **Trình Đọc (Reader)** và **Cài Đặt Hệ Thống (Settings)** vào chung một ứng dụng SPA duy nhất (`web_reader/index.html` + `app.js`):
+  - **Điều hướng không tải lại (Zero-Reload Navigation)**: Thanh header Sổ Tay cho phép chuyển đổi tức thì giữa các tab `#reader` và `#settings`. Khi người dùng đang đọc ở Trang 15 và chuyển sang tab Cài Đặt để chỉnh API Key, bấm quay lại Trình Đọc vẫn giữ nguyên 100% tiến độ và tọa độ trang đang đọc.
+  - **Hỗ trợ URL động**: `overlay_server.py` tự động định tuyến các đường dẫn `/`, `/reader` và `/settings` về cùng ứng dụng SPA, tự động kích hoạt tab tương ứng dựa trên hash và pathname.
 
-### Quản Lý Cấu Hình Tập Trung (`config_manager.py`)
+### 2. Ngôn Ngữ Thiết Kế Sổ Tay Manga (Hand-Drawn Notebook Design System)
+- Giao diện được xây dựng từ triết lý thẩm mỹ thủ công, tôn vinh nét vẽ phác thảo truyện tranh truyền thống:
+  - **Nền giấy ấm & Hạt vân giấy (Paper Texture)**: Màu nền `#fdfbf7` kết hợp hoa văn chấm bi giấy ghi chú (`radial-gradient` 24px) mang lại cảm giác dễ chịu cho mắt khi đọc truyện lâu.
+  - **Đường viền Wobbly (Không đường thẳng tuyệt đối)**: Sử dụng các giá trị `border-radius` hữu cơ bất đối xứng kết hợp nét viền chì mềm `#2d2d2d` dày 2.5px - 3px.
+  - **Bóng đổ cứng (Hard Offset Shadows)**: Hiệu ứng cắt giấy nổi (cut-paper collage) 4px/6px không làm mờ viền (zero blur). Khi click chuột, nút bấm lún phẳng vào mặt giấy (`translate(4px, 4px)` với shadow 0px).
+  - **Hệ thống Vector SVG Nét Chì**: Toàn bộ icon được vẽ bằng đường nét vector stroke 2.5px thuần chì `#2d2d2d`, không dùng icon màu emoji hệ điều hành.
+  - **Typography viết tay chuẩn mực**: Tiêu đề và nút bấm sử dụng font bút dạ lông `Kalam` (wght 700), nội dung mô tả và thông số sử dụng font chữ viết tay tự nhiên `Patrick Hand` (wght 400).
+
+### 3. Quản Lý Cấu Hình Tập Trung & Multi-Profile (`config_manager.py`)
 - Cấu hình được lưu tại `config.json`.
 - Tự động bảo vệ đa luồng qua `threading.Lock()`.
-- Hỗ trợ chuẩn hóa URL tự động: Tự động bổ sung `/openai` nếu người dùng nhập link Google Gemini Studio.
+- Hỗ trợ đa hồ sơ (Multi-Profile): Cho phép tạo, chuyển đổi, xóa các hồ sơ dịch thuật riêng biệt (Google Free, Gemini 2.0 Flash, Qwen 3.5, DeepSeek, Ollama Local).
 - Che mờ API Key an toàn trên UI bằng hàm `mask_api_key` (`sk-xt-12****34`).
+- Thử nghiệm kết nối thời gian thực qua endpoint `/api/test-llm` đo độ trễ mạng (latency ms).
 
 ---
 
 ## 6. Bảo Mật & Cơ Chế Auto-Download Model
 
 ### 1. Nguyên Tắc Bảo Mật Bản Chia Sẻ (Zero-Leak Policy)
-- Bản chia sẻ trong thư mục `Manga-Translator-Share/` đã được lọc bỏ toàn bộ các API Key thử nghiệm.
+- Bản chia sẻ trong kho lưu trữ đã được lọc bỏ toàn bộ các API Key cá nhân.
 - `DEFAULT_CONFIG` và `config.json` chỉ chứa chuỗi rỗng `""`.
 - Đi kèm file `.gitignore` để người dùng không bao giờ vô tình commit key cá nhân của họ lên kho lưu trữ công khai.
 
 ### 2. Logic Tự Động Tải Mô Hình AI (`download_models.py`)
 - Khi người dùng mới nhận dự án (chỉ nặng ~260 KB), họ không cần phải tải thủ công từng file ONNX:
-  1. Script kết nối tới HuggingFace Hub qua `huggingface_hub.hf_hub_download`.
+  1. Script kết nối tới HuggingFace Hub qua `huggingface_hub.hf_hub_download` và `snapshot_download`.
   2. Kiểm tra mã băm (Hash) và dung lượng file trên máy.
   3. Nếu thiếu file `comic-text-detector.onnx`, script tự tải về thư mục `models/`.
-  4. Nếu máy chưa có cache Manga-OCR, script tự động nạp `mayocream/manga-ocr-onnx` vào cache máy tính.
+  4. Nếu máy chưa có cache Manga-OCR, script tự động nạp `mayocream/manga-ocr-onnx` vào cache máy tính bằng `RobustMangaOcr`.
   5. Chạy 1 lượt kiểm thử giả lập (Dummy test) trên ảnh trắng để đảm bảo DirectML nạp thành công trước khi kết thúc.
-
----
-
-*Tài liệu được biên soạn đồng bộ với phiên bản Manga Translator AI v2.3.*
