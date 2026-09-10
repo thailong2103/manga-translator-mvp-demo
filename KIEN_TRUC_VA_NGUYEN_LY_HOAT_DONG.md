@@ -30,38 +30,38 @@ Hệ thống được xây dựng theo mô hình **Client-Server Cục Bộ Bấ
 
 ```mermaid
 flowchart TD
-    subgraph Clients["1. TẦNG GIAO DIỆN CLIENT (FRONTEND)"]
+    subgraph Clients["1. TẦNG GIAO DIỆN CLIENT - FRONTEND"]
         direction TB
-        C1["MangaDex Web + Userscript Overlay<br/>- Bắt sự kiện DOM MangaDex qua MutationObserver<br/>- Tự động tách Chapter UUID & tải URL ảnh<br/>- Chiếu tọa độ Responsive & phủ bản dịch lên bóng thoại"]
-        C2["Local Web Reader SPA (Single-Page App)<br/>- Kéo thả thư mục truyện từ ổ đĩa cục bộ<br/>- Chế độ đọc Webtoon dọc / Từng trang đơn<br/>- Tùy chỉnh Font, màu nền giấy, độ mờ hộp thoại"]
+        C1["MangaDex Web + Userscript Overlay<br/>- Bắt sự kiện DOM MangaDex qua MutationObserver<br/>- Tự động tách Chapter UUID và tải URL ảnh<br/>- Chiếu tọa độ Responsive và phủ bản dịch lên bóng thoại"]
+        C2["Local Web Reader SPA - Single-Page App<br/>- Kéo thả thư mục truyện từ ổ đĩa cục bộ<br/>- Chế độ đọc Webtoon dọc hoặc Từng trang đơn<br/>- Tùy chỉnh Font, màu nền giấy, độ mờ hộp thoại"]
     end
 
-    subgraph Backend["2. TẦNG ĐIỀU PHỐI CỤC BỘ (LOCAL BACKEND SERVER)"]
+    subgraph Backend["2. TẦNG ĐIỀU PHỐI CỤC BỘ - LOCAL BACKEND SERVER"]
         direction TB
-        S1["overlay_server.py (Cổng 8765)<br/>- Máy chủ HTTP đa luồng (ThreadingHTTPServer)<br/>- Bộ điều hướng RESTful API & Cung cấp tĩnh SPA Web Reader<br/>- Hỗ trợ CORS toàn phần cho trình duyệt & Tampermonkey"]
-        CFG["config_manager.py (Quản lý cấu hình)<br/>- Quản lý Multi-Profile API Key / Model / Base URL<br/>- Khóa loại trừ tương hỗ (threading.Lock)<br/>- Mặt nạ bảo mật API Key trên giao diện"]
+        S1["overlay_server.py - Cổng 8765<br/>- Máy chủ HTTP đa luồng ThreadingHTTPServer<br/>- Bộ điều hướng RESTful API và Cung cấp tĩnh SPA Web Reader<br/>- Hỗ trợ CORS toàn phần cho trình duyệt và Tampermonkey"]
+        CFG["config_manager.py - Quản lý cấu hình<br/>- Quản lý Multi-Profile API Key / Model / Base URL<br/>- Khóa loại trừ tương hỗ threading.Lock<br/>- Mặt nạ bảo mật API Key trên giao diện"]
         S1 <--> CFG
     end
 
-    subgraph Pipeline["3. BĂNG CHUYỀN DỊCH STREAMING (PIPELINE DISPATCH)"]
+    subgraph Pipeline["3. BĂNG CHUYỀN DỊCH STREAMING - PIPELINE DISPATCH"]
         direction TB
-        F1["MangaDex Fetcher / Local Loader<br/>- Trích xuất metadata & URLs ảnh<br/>- Tải trang ưu tiên và nạp vào bộ đệm cache"]
+        F1["MangaDex Fetcher / Local Loader<br/>- Trích xuất metadata và URLs ảnh<br/>- Tải trang ưu tiên và nạp vào bộ đệm cache"]
         
-        DET["Comic-Text-Detector ONNX<br/>- Định vị khung thoại trên GPU DirectML / CPU<br/>- Phân loại & sắp xếp thứ tự đọc Manga (Top-to-Bottom, Right-to-Left)"]
+        DET["Comic-Text-Detector ONNX<br/>- Định vị khung thoại trên GPU DirectML hoặc CPU<br/>- Phân loại và sắp xếp thứ tự đọc Manga từ Phải sang Trái"]
         
         F1 --> DET
         
-        DET -->|Nhánh A: Tách chữ & Dịch văn bản| PA["Pipeline OCR + Text Translation<br/>(Tiết kiệm 95% chi phí token, tốc độ cao)"]
-        DET -->|Nhánh B: Đánh dấu nhãn & Dịch ảnh| PB["Pipeline Vision Multimodal<br/>(Hiểu biểu cảm khuôn mặt & bối cảnh tranh)"]
+        DET -->|Nhánh A: Tách chữ và Dịch text| PA["Pipeline OCR + Text Translation<br/>Tiết kiệm 95% token, tốc độ cao"]
+        DET -->|Nhánh B: Đánh dấu nhãn và Dịch ảnh| PB["Pipeline Vision Multimodal<br/>Hiểu biểu cảm khuôn mặt và bối cảnh tranh"]
         
         subgraph EngineA["Các Engine Nhánh A"]
-            OCR["Multi-Engine OCR Torchless<br/>- Manga-OCR ONNX (Tiếng Nhật)<br/>- RapidOCR ONNX (Tiếng Anh / Tiếng Trung)"]
-            TRANS["Bộ Dịch Lựa Chọn<br/>- Google Translate Batch Stream (Miễn phí)<br/>- LLM Text-Only (Qwen / DeepSeek / Gemini)<br/>- Raw Text (Giữ nguyên bản gốc)"]
+            OCR["Multi-Engine OCR Torchless<br/>- Manga-OCR ONNX cho Tiếng Nhật<br/>- RapidOCR ONNX cho Tiếng Anh / Tiếng Trung"]
+            TRANS["Bộ Dịch Lựa Chọn<br/>- Google Translate Batch Stream miễn phí<br/>- LLM Text-Only như Qwen / DeepSeek / Gemini<br/>- Raw Text giữ nguyên bản gốc"]
             OCR --> TRANS
         end
         
         subgraph EngineB["Các Engine Nhánh B"]
-            SOM["Set-of-Mark Processing<br/>Vẽ nhãn số [1], [2] và khung màu nổi bật"]
+            SOM["Set-of-Mark Processing<br/>Vẽ nhãn số 1, 2 và khung màu nổi bật"]
             VLLM["Multimodal Vision LLM API<br/>Qwen 3.5 / Gemini 2.0 Flash qua Base URL"]
             SOM --> VLLM
         end
@@ -69,14 +69,15 @@ flowchart TD
         PA --> OCR
         PB --> SOM
         
-        OUT["Bộ Ghi Đĩa Tăng Tiến (Atomic Incremental Dispatch)<br/>- Ghi file JSON từng trang ngay khi hoàn tất (t=1.5s)<br/>- Phát thông báo trạng thái phục vụ Frontend render tức thì"]
+        OUT["Bộ Ghi Đĩa Tăng Tiến Atomic Incremental Dispatch<br/>- Ghi file JSON từng trang ngay khi hoàn tất ở giây 1.5<br/>- Phát thông báo trạng thái phục vụ Frontend render tức thì"]
         
         TRANS --> OUT
         VLLM --> OUT
     end
 
-    Clients <-->|HTTP REST / Long Polling (Cổng 8765)| Backend
-    Backend <-->|ThreadPoolExecutor & Event Callback| Pipeline
+    C1 -->|HTTP REST / Long Polling qua Port 8765| S1
+    C2 -->|HTTP REST / Long Polling qua Port 8765| S1
+    S1 -->|Điều phối tác vụ dịch| F1
     OUT -.->|Đọc dữ liệu JSON hoàn tất| S1
 ```
 
@@ -93,30 +94,30 @@ Kiến trúc xử lý trí tuệ nhân tạo được mô-đun hóa thành hai p
 
 ```mermaid
 flowchart TD
-    IMG["Ảnh Trang Truyện Gốc (Original Image)"] --> PRE["Tiền Xử Lý: Letterbox Resize 1024x1024, Padding, Float32 / 255.0"]
-    PRE --> CTD["Comic-Text-Detector ONNX (DirectML GPU / CPU)<br/>Thời gian suy luận: ~120ms - 170ms"]
+    IMG["Ảnh Trang Truyện Gốc - Original Image"] --> PRE["Tiền Xử Lý: Letterbox Resize 1024x1024, Padding, Float32 / 255.0"]
+    PRE --> CTD["Comic-Text-Detector ONNX trên DirectML GPU / CPU<br/>Thời gian suy luận: 120ms - 170ms"]
     
-    CTD --> POST["Hậu Xử Lý Bounding Box:<br/>- Lọc ngưỡng tự tin (obj_conf > 0.18, score > 0.14)<br/>- Non-Maximum Suppression (NMS threshold = 0.35)<br/>- Lọc nhiễu kích thước (bw > 25, bh > 20)"]
+    CTD --> POST["Hậu Xử Lý Bounding Box:<br/>- Lọc ngưỡng tự tin obj_conf > 0.18, score > 0.14<br/>- Non-Maximum Suppression với NMS threshold = 0.35<br/>- Lọc nhiễu kích thước bw > 25, bh > 20"]
     
-    POST --> RO["Thuật Toán Sắp Xếp Thứ Tự Đọc Manga (Manga Reading Order):<br/>- Gom cụm theo trục Y với dung sai y_threshold = h * 0.10<br/>- Sắp xếp trong tầng từ Phải sang Trái (-cx)<br/>- Gán định danh tuần tự (ID = 1, 2, 3...)"]
+    POST --> RO["Thuật Toán Sắp Xếp Thứ Tự Đọc Manga:<br/>- Gom cụm theo trục Y với dung sai y_threshold = h * 0.10<br/>- Sắp xếp trong tầng từ Phải sang Trái -cx<br/>- Gán định danh tuần tự ID = 1, 2, 3..."]
     
     RO --> BRANCH{Lựa Chọn Pipeline Hệ Thống}
     
-    BRANCH -->|Pipeline ocr_trans| OCR_SWITCH{Chọn Engine OCR Theo Ngôn Ngữ}
-    OCR_SWITCH -->|Tiếng Nhật (ja)| M_OCR["Manga-OCR ONNX<br/>(ViT + RoBERTa/BERT Torchless)"]
-    OCR_SWITCH -->|Tiếng Anh (en)| R_OCR_EN["RapidOCR ONNX (PaddleOCR Latinh)<br/>Tách dòng, sắp xếp Y, giữ nguyên khoảng trắng"]
-    OCR_SWITCH -->|Tiếng Trung (zh)| R_OCR_ZH["RapidOCR ONNX (PaddleOCR Hán ngữ)<br/>Ghép liền chuỗi văn bản không dấu cách"]
+    BRANCH -->|Pipeline ocr_trans| OCR_SWITCH{Chọn Engine OCR}
+    OCR_SWITCH -->|Tiếng Nhật ja| M_OCR["Manga-OCR ONNX<br/>ViT + RoBERTa/BERT Torchless"]
+    OCR_SWITCH -->|Tiếng Anh en| R_OCR_EN["RapidOCR ONNX Latinh<br/>Tách dòng, sắp xếp Y, giữ nguyên khoảng trắng"]
+    OCR_SWITCH -->|Tiếng Trung zh| R_OCR_ZH["RapidOCR ONNX Hán ngữ<br/>Ghép liền chuỗi văn bản không dấu cách"]
     
     M_OCR --> T_SWITCH{Chọn Bộ Dịch}
     R_OCR_EN --> T_SWITCH
     R_OCR_ZH --> T_SWITCH
     
-    T_SWITCH -->|Google Translate| G_TR["Google Translate Batch Stream<br/>Ghép chuỗi bằng '\\n' qua endpoint clients5 chống 429"]
-    T_SWITCH -->|LLM Text-Only| LLM_TR["LLM Text-Only API (OpenAI Compatible)<br/>Prompt dịch chuyên ngữ manga, auto fallback sang Google"]
+    T_SWITCH -->|Google Translate| G_TR["Google Translate Batch Stream<br/>Ghép chuỗi qua endpoint clients5 chống 429"]
+    T_SWITCH -->|LLM Text-Only| LLM_TR["LLM Text-Only API tương thích OpenAI<br/>Prompt dịch chuyên ngữ manga, auto fallback sang Google"]
     T_SWITCH -->|Raw Mode| RAW_TR["Giữ Nguyên Ký Tự Gốc Đã OCR"]
     
-    BRANCH -->|Pipeline image_trans| SOM["Set-of-Mark Processing<br/>Vẽ viền khung màu và nhãn số [1], [2] trực tiếp lên ảnh"]
-    SOM --> V_LLM["Multimodal Vision LLM (Qwen 3.5 / Gemini Flash)<br/>Dịch nhận thức biểu cảm nhân vật qua hình ảnh"]
+    BRANCH -->|Pipeline image_trans| SOM["Set-of-Mark Processing<br/>Vẽ viền khung màu và nhãn số 1, 2 trực tiếp lên ảnh"]
+    SOM --> V_LLM["Multimodal Vision LLM như Qwen 3.5 / Gemini Flash<br/>Dịch nhận thức biểu cảm nhân vật qua hình ảnh"]
     
     G_TR --> MERGE["Đóng gói mảng JSON kết quả trang"]
     LLM_TR --> MERGE
@@ -238,40 +239,40 @@ Khác biệt cốt lõi tạo nên tốc độ ấn tượng của MangaStream A
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Người Đọc (Frontend)
-    participant Svr as Local Server (8765)
-    participant GPU as DirectML Detector (GPU)
+    actor User as Người Đọc - Frontend
+    participant Svr as Local Server - Port 8765
+    participant GPU as DirectML Detector GPU
     participant OCR as Multi-Engine OCR
-    participant Pool as API ThreadPool (Max 10)
-    participant Disk as Atomic Disk I/O
+    participant Pool as API ThreadPool Max 10
+    participant Disk as Atomic Disk IO
 
-    Note over User, Disk: T=0s: Người đọc mở chương truyện
-    User->>Svr: POST /api/translate (Chapter UUID)
-    Svr-->>User: HTTP 200 {status: "started"}
+    Note over User, Disk: Thời điểm t=0s - Người đọc mở chương truyện
+    User->>Svr: POST /api/translate với Chapter UUID
+    Svr-->>User: HTTP 200 đã bắt đầu dịch ngầm
     
     rect rgb(240, 248, 255)
-        Note over Svr, Disk: GIAI ĐOẠN XỬ LÝ TRANG 1 (ƯU TIÊN TUYỆT ĐỐI)
-        Svr->>GPU: Nạp ảnh Trang 1 -> Phát hiện bóng thoại (gpu_lock)
-        GPU-->>Svr: Trả về Bounding Boxes (~160ms)
-        Svr->>OCR: Bóc tách chữ Trang 1 (~200ms)
+        Note over Svr, Disk: GIAI ĐOẠN XỬ LÝ TRANG 1 - ƯU TIÊN TUYỆT ĐỐI
+        Svr->>GPU: Nạp ảnh Trang 1 để quét bóng thoại qua gpu_lock
+        GPU-->>Svr: Trả về Bounding Boxes mất khoảng 160ms
+        Svr->>OCR: Bóc tách chữ Trang 1 mất khoảng 200ms
         OCR-->>Svr: Mảng văn bản gốc
-        Svr->>Pool: Dispatch task dịch Trang 1
-        Pool-->>Disk: Dịch xong -> Ghi Trang 1 vào JSON (results_lock)
-        Disk-->>User: Ghi file hoàn tất tại t=1.5s!
-        User->>Svr: GET /api/status?id=... (Polling 1.5s)
-        Svr-->>User: Đã có Trang 1 -> RENDER NGAY LẬP TỨC!
+        Svr->>Pool: Đẩy tác vụ dịch Trang 1 vào luồng API
+        Pool-->>Disk: Dịch xong và ghi Trang 1 vào JSON qua results_lock
+        Disk-->>User: Ghi file hoàn tất tại giây 1.5
+        User->>Svr: Thăm dò tiến độ GET /api/status chu kỳ 1.5s
+        Svr-->>User: Đã có Trang 1 - RENDER NGAY LẬP TỨC!
     end
 
     rect rgb(255, 250, 240)
-        Note over Svr, Disk: GIAI ĐOẠN BĂNG CHUYỀN SONG SONG (CÁC TRANG TIẾP THEO)
+        Note over Svr, Disk: GIAI ĐOẠN BĂNG CHUYỀN SONG SONG CHO CÁC TRANG TIẾP THEO
         par Luồng GPU
-            Svr->>GPU: Detect Trang 2 (~160ms)
-            Svr->>GPU: Detect Trang 3 (~160ms)
-            Svr->>GPU: Detect Trang 4 (~160ms)
-        and Luồng OCR & Dịch Song Song (ThreadPool)
-            Pool->>Pool: Dịch Trang 2 (Hoàn thành t=2.2s)
+            Svr->>GPU: Detect Trang 2 mất 160ms
+            Svr->>GPU: Detect Trang 3 mất 160ms
+            Svr->>GPU: Detect Trang 4 mất 160ms
+        and Luồng OCR và Dịch Song Song ThreadPool
+            Pool->>Pool: Dịch Trang 2 hoàn thành lúc 2.2s
             Pool-->>Disk: Ghi tăng tiến Trang 2
-            Pool->>Pool: Dịch Trang 3 (Hoàn thành t=2.9s)
+            Pool->>Pool: Dịch Trang 3 hoàn thành lúc 2.9s
             Pool-->>Disk: Ghi tăng tiến Trang 3
         end
     end
@@ -315,11 +316,11 @@ Máy chủ Backend khởi chạy trên tiến trình đa luồng [`ThreadingHTTP
 
 ```mermaid
 flowchart LR
-    subgraph Browser["Trình Duyệt (MangaDex hoặc Local Reader)"]
-        OBS["MutationObserver lắng nghe DOM"] --> MATCH["Phát hiện thẻ <img> truyện"]
+    subgraph Browser["Trình Duyệt - MangaDex hoặc Local Reader"]
+        OBS["MutationObserver lắng nghe DOM"] --> MATCH["Phát hiện thẻ img ảnh truyện"]
         MATCH --> COORD["Thuật Toán Chiếu Tọa Độ Động:<br/>scale_x = img.clientWidth / orig_w<br/>scale_y = img.clientHeight / orig_h"]
         COORD --> BOX["Tính vị trí hiển thị:<br/>left = orig_x * scale_x + img.offsetLeft<br/>top = orig_y * scale_y + img.offsetTop"]
-        BOX --> FONT["Giải thuật Auto Font Fitting:<br/>Tính fontSize (11px - 24px) dựa trên diện tích hộp và độ dài câu"]
+        BOX --> FONT["Giải thuật Auto Font Fitting:<br/>Tính fontSize từ 11px đến 24px theo diện tích hộp và độ dài câu"]
         FONT --> DOM["Tạo phần tử overlay và tiêm an toàn qua Trusted Types CSP Policy"]
     end
 ```
@@ -380,14 +381,14 @@ Tệp cấu hình [`config.json`](file:///c:/Vide_coding/Manga-Translator-Share/
 
 ```mermaid
 flowchart TD
-    UI["Giao Diện Client (Tampermonkey Menu / Web Reader Settings)"] -->|POST /api/config| SVR["overlay_server.py"]
+    UI["Giao Diện Client - Tampermonkey Menu hoặc Web Reader Settings"] -->|POST /api/config| SVR["overlay_server.py"]
     SVR --> CM["config_manager.py"]
     
     subgraph CoreConfig["Xử Lý Cấu Hình An Toàn"]
-        LOCK["threading.Lock (Chống xung đột đa tiến trình)"]
-        MASK["mask_api_key (Ẩn an toàn: sk-xt...34)"]
-        NORM["normalize_base_url (Chuẩn hóa tự động endpoint Google AI Studio / v1beta)"]
-        ATOMIC["Ghi nguyên tử: config.json.tmp -> atomic replace config.json"]
+        LOCK["threading.Lock chống xung đột đa luồng"]
+        MASK["mask_api_key che bớt ký tự an toàn sk-xt...34"]
+        NORM["normalize_base_url chuẩn hóa tự động endpoint Google AI Studio"]
+        ATOMIC["Ghi nguyên tử: lưu file tạm rồi đổi tên sang config.json"]
     end
     
     CM --> LOCK
